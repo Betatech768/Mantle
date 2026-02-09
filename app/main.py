@@ -25,11 +25,14 @@ BUILTINS = {
 
 
 def cmd_type(*args):
-
-    if *args in BUILTINS:
-        print(f"{args} is a builtin shell command")
+    if not args:
+        print("missing arguments")
+        return
+    command = args[0]
+    if command in BUILTINS:
+        print(f"{command} is a builtin shell command")
     else:
-        print(f"{args} not found")
+        print(f"{command} not found")
 
 
 def main():
