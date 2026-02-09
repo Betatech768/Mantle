@@ -22,25 +22,23 @@ BUILTINS = {
 def main():
     # TODO: Uncomment the code below to pass the first stage
    while True:
-    try:
-        command = input('$ ').strip()
-        if not command:
-            continue 
-        parts = shlex.split(command)
-        userCommand = parts[0]
-        args = parts[1:]
+        try:
+            command = input('$ ').strip()
+            if not command:
+                continue 
+            parts = shlex.split(command)
+            userCommand = parts[0]
+            args = parts[1:]
 
-        if userCommand in BUILTINS:
-            BUILTINS[userCommand](*args)
-        else:
-            print(f"{userCommand}: command not found")
-    except KeyboardInterrupt:
-            print()
-    except Exception as e:
-            print(f"{userCommand} not found, error - {e}")
-
-
-
+            if userCommand in BUILTINS:
+                # BUILTINS[userCommand](*args)
+                print(f"{userCommand} is a shell builtin")
+            else:
+                print(f"{userCommand}: not found")
+        except KeyboardInterrupt:
+                print()
+        except Exception as e:
+                print(f"{userCommand} not found, error - {e}")
 
 
 if __name__ == "__main__":
