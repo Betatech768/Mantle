@@ -13,9 +13,12 @@ def cmd_clear():
 
 
 def cmd_type(*args):
-    if not args:
-        print(f"missing arguments")
-        return
+    command = args[0]
+
+    if command in BUILTINS:
+        print(f"{command} is a shell command")
+    else:
+        print(f"{command} not found")
     
 BUILTINS = {
     "exit" : cmd_exit,
