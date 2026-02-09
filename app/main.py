@@ -60,7 +60,9 @@ def find_executable(command):
     return None
 
 
-
+def get_cwd:
+    working_directory = os.getcwd()
+    print(working_directory)
 
 BUILTINS = {
     "exit" : cmd_exit,
@@ -68,6 +70,7 @@ BUILTINS = {
     "help" : lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
     "type": cmd_type,
+    "pwd": get_cwd,
 }
 
 def main():
