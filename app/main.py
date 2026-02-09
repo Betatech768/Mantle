@@ -3,7 +3,7 @@ import os
 import shlex
 
 def cmd_exit():
-    break
+    sys.exit(0)
 
 def cmd_clear():
     if sys.platform != "win32":
@@ -16,15 +16,13 @@ BUILTINS = {
     "echo" : lambda *args: print(" ".join(args)),
     "help" : lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
-    if sys.platform !="win32"
-    else os.system('cls'),
+    
 }
 
 def main():
     # TODO: Uncomment the code below to pass the first stage
    while True:
     try:
-        sys.stdout("$")
         command = input('$ ').strip()
         if not command:
             continue 
