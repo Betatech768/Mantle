@@ -60,9 +60,28 @@ def find_executable(command):
     return None
 
 
+# Print Current Working Directory
 def get_cwd():
     working_directory = os.getcwd()
     print(working_directory)
+
+
+# Change working Directory 
+def change_directory(*args):
+    if not args:
+        return 
+    directory = args[0]
+    try:
+        os.chdir(directory)
+    except FileNotFoundError:
+        print(f" cd: {directory}: No such file or directory")
+    except NotADirectoryError:
+        print(f" cd: {directory}: Not a directory")
+    except PermissionError:
+        print(f" cd: {directory}: Permmission denied")
+    pass
+
+
 
 BUILTINS = {
     "exit" : cmd_exit,
@@ -71,6 +90,7 @@ BUILTINS = {
     "clear": cmd_clear,
     "type": cmd_type,
     "pwd": get_cwd,
+    "cd": change_directory,
 }
 
 def main():
