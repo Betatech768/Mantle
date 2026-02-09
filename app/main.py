@@ -14,7 +14,7 @@ def cmd_clear():
 BUILTINS = {
     "exit" : cmd_exit,
     "echo" : lambda *args: print(" ".join(args)),
-    "help" : lambda: print("available commands exit, help, echo, clear"),
+    "help" : lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
     if sys.platform !="win32"
     else os.system('cls'),
