@@ -13,8 +13,10 @@ def cmd_clear():
 
 
 def cmd_type(*args):
-
-
+    if not args:
+        print(f"missing arguments")
+        return
+    
 BUILTINS = {
     "exit" : cmd_exit,
     "echo" : lambda *args: print(" ".join(args)),
