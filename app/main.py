@@ -23,22 +23,10 @@ def cmd_type(*args):
 BUILTINS = {
     "exit" : cmd_exit,
     "echo" : lambda *args: print(" ".join(args)),
-    if not args:
-        print("missing arguments")
-        return
-    command = args[0]
-    if command in BUILTINS:
-        print(f"{command} is a builtin shell command")
-    else:
-        print(f"{command} not found")
     "help" : lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
     "type": cmd_type,
-    
 }
-
-
-
 
 def main():
     # TODO: Uncomment the code below to pass the first stage
