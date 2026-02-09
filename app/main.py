@@ -14,6 +14,8 @@ def cmd_clear():
 
 
 def cmd_type(*args):
+    if not args:
+        print(f"type: missing arguement")
     command = args[0]
 
     if command in BUILTINS:
@@ -23,7 +25,7 @@ def cmd_type(*args):
     # search in PATH directories
 
     path_env = os.environ.get('PATH', '')
-    if sys.platfrom == 'win32':
+    if sys.platform == 'win32':
         directories = path_env.split(';')
     else:
         directories = path_env.split(':')
@@ -86,7 +88,7 @@ def main():
                if executable_path:
                     subprocess.run([executable_path] + args)
                else:
-                    print(f"{userCommand}: command not found")
+                    print(f"{userCommand}: not found")
         except KeyboardInterrupt:
                 print()
         except Exception as e:
