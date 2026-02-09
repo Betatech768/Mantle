@@ -7,7 +7,7 @@ def main():
     command = input("$ ").lower()
     print(f"{command}: command not found")
 
-    if command == "exist":
+    if command == "exit":
         break 
 
 
