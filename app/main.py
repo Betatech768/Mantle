@@ -131,14 +131,14 @@ def main():
                         sys.stdout = original_stdout
 
             else:
-               executable_path = find_executable(userCommand)
-                    if executable_path:
+                executable_path = find_executable(userCommand)
+                if executable_path:
                         if output_file:
                             with open(output_file, 'w') as f:
                                 subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
                         else:
                             subprocess.run([userCommand] + args, executable=executable_path)
-                    else:
+                else:
                         print(f"{userCommand}: not found")
         except KeyboardInterrupt:
                 print()
