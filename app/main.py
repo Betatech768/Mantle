@@ -41,7 +41,6 @@ def cmd_type(*args):
 def find_executable(command):
     """ This Function is to Find an Executable file Path not Present in the Built-In"""
 
-    file_name = command[0]
     path_env = os.environ.get('PATH', '')
     separator = ";" if sys.platform == "win32" else ":"
 
@@ -50,7 +49,7 @@ def find_executable(command):
 
     for directory in directories:
 
-        file_path = os.path.join(directory, file_name)
+        file_path = os.path.join(directory, command)
 
         if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
             return file_path
