@@ -11,14 +11,26 @@ def cmd_clear():
     else:
         os.system('cls')
 
+
+
+
 BUILTINS = {
     "exit" : cmd_exit,
     "echo" : lambda *args: print(" ".join(args)),
     "help" : lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
-    "type": lambda args: print(f"{args} is a shell builtin")
+    "type": cmd_type(*args),
     
 }
+
+
+def cmd_type(*args):
+
+    if *args in BUILTINS:
+        print(f"{args} is a builtin shell command")
+    else:
+        print(f"{args} not found")
+
 
 def main():
     # TODO: Uncomment the code below to pass the first stage
