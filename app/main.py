@@ -1,6 +1,7 @@
 import sys
 import os
 import shlex
+import subprocess
 
 def cmd_exit():
     sys.exit(0)
