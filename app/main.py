@@ -111,7 +111,7 @@ def main():
                 command = part[0].strip()
                 output_file = part[1].strip()
 
-                if command.endswith(1):
+                if command.endswith('1'):
                     command = command[:-1].strip()
             
             parts = shlex.split(command)
