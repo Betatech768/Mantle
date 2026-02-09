@@ -16,6 +16,7 @@ BUILTINS = {
     "echo" : lambda *args: print(" ".join(args)),
     "help" : lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
+    "type": lambda args: print(f"{args} is a shell builtin")
     
 }
 
@@ -27,12 +28,12 @@ def main():
             if not command:
                 continue 
             parts = shlex.split(command)
-            userCommand = parts[1]
+            userCommand = parts[0]
+            immediateArgs = parts[1]
             args = parts[1:]
 
             if userCommand in BUILTINS:
-                # BUILTINS[userCommand](*args)
-                print(f"{userCommand} is a shell builtin")
+                BUILTINS[userCommand](*immediateArgs)
             else:
                 print(f"{userCommand}: not found")
         except KeyboardInterrupt:
