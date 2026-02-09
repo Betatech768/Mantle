@@ -104,17 +104,43 @@ def main():
             command = input('$ ').strip()
             if not command:
                 continue 
+
+
+            if ">" in command:
+                part = command.split(">", 1)
+                command = part[0].strip()
+                output_file = part[1].strip()
+
+                if command.endswith(1):
+                    command = command[:-1].strip()
+            
             parts = shlex.split(command)
             userCommand = parts[0]
             args = parts[1:]
 
             if userCommand in BUILTINS:
                 BUILTINS[userCommand](*args)
+
+                if output_file:
+                    with open(output_file, 'w') as f:
+                        original_stdout = sys.stdout
+                        sys.stdout = f
+                    try:
+                        BUILINS[userCommand](*args)
+                    finally:
+                        sys.stdout = original_stdout
+
             else:
                executable_path = find_executable(userCommand)
                if executable_path:
-                    subprocess.run([userCommand] + args, executable=executable_path)
+                    if output_file:
+                        with open(output_file, 'w') as f:
+                            subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
+
                else:
+                    subprocess.run([userCommand] + args, executable=executable_path)
+                    
+                else:
                     print(f"{userCommand}: not found")
         except KeyboardInterrupt:
                 print()
