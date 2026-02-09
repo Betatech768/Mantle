@@ -17,8 +17,22 @@ def cmd_type(*args):
 
     if command in BUILTINS:
         print(f"{command} is a shell builtin")
-    else:
-        print(f"{command} not found")
+        return 
+    
+    # search in PATH directories
+
+    path_env = os.environ.get('PATH', '')
+    directories = path_env.split(':')
+
+    for directory in directories:
+        full_path = os.path.join(directory, command)
+
+        if os.path.isfile(full_path):
+            if os.access(full_path, os.X_OK):
+                print(f"{command} is {full_path}")
+                return 
+   
+    print(f"{command} not found")
     
 BUILTINS = {
     "exit" : cmd_exit,
