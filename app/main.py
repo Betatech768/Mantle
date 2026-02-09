@@ -27,7 +27,7 @@ def main():
             if not command:
                 continue 
             parts = shlex.split(command)
-            userCommand = parts[0]
+            userCommand = parts[1]
             args = parts[1:]
 
             if userCommand in BUILTINS:
