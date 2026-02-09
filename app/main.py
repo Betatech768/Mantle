@@ -82,8 +82,8 @@ def main():
             if userCommand in BUILTINS:
                 BUILTINS[userCommand](*args)
             else:
-               executable = find_executable(userCommand)
-               if executable:
+               executable_path = find_executable(userCommand)
+               if executable_path:
                     subprocess.run([executable_path] + args)
                else:
                     print(f"{userCommand}: command not found")
