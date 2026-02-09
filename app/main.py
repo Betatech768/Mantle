@@ -12,19 +12,12 @@ def cmd_clear():
         os.system('cls')
 
 
+def cmd_type(*args):
 
 
 BUILTINS = {
     "exit" : cmd_exit,
     "echo" : lambda *args: print(" ".join(args)),
-    "help" : lambda *args: print("available commands exit, help, echo, clear"),
-    "clear": cmd_clear,
-    "type": cmd_type(*args),
-    
-}
-
-
-def cmd_type(*args):
     if not args:
         print("missing arguments")
         return
@@ -33,6 +26,13 @@ def cmd_type(*args):
         print(f"{command} is a builtin shell command")
     else:
         print(f"{command} not found")
+    "help" : lambda *args: print("available commands exit, help, echo, clear"),
+    "clear": cmd_clear,
+    "type": cmd_type,
+    
+}
+
+
 
 
 def main():
@@ -44,11 +44,10 @@ def main():
                 continue 
             parts = shlex.split(command)
             userCommand = parts[0]
-            immediateArgs = parts[1]
             args = parts[1:]
 
             if userCommand in BUILTINS:
-                BUILTINS[userCommand](*immediateArgs)
+                BUILTINS[userCommand](*args)
             else:
                 print(f"{userCommand}: not found")
         except KeyboardInterrupt:
