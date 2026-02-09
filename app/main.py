@@ -60,7 +60,7 @@ def find_executable(command):
     return None
 
 
-def get_cwd:
+def get_cwd():
     working_directory = os.getcwd()
     print(working_directory)
 
