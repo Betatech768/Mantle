@@ -16,7 +16,7 @@ def cmd_type(*args):
     command = args[0]
 
     if command in BUILTINS:
-        print(f"{command} is a shell command")
+        print(f"{command} is a shell builtin")
     else:
         print(f"{command} not found")
     
