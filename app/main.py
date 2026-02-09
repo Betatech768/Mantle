@@ -22,7 +22,11 @@ def cmd_type(*args):
     # search in PATH directories
 
     path_env = os.environ.get('PATH', '')
-    directories = path_env.split(':')
+    if sys.platfrom == 'win32':
+        directories = path_env.split(';')
+    else:
+        directories = path_env.split(':')
+        
 
     for directory in directories:
         full_path = os.path.join(directory, command)
@@ -33,7 +37,29 @@ def cmd_type(*args):
                 return 
    
     print(f"{command} not found")
+
+def find_executable(command):
+    """ This Function is to Find an Executable file Path not Present in the Built-In"""
+
+    file_name = command[0]
+    path_env = os.environ.get('PATH', '')
+    separator = ";" if sys.platform == "win32" else ":"
+
+    directories = path_env.split(separator)
     
+
+    for directory in directories:
+
+        file_path = os.path.join(directory, file_name)
+
+        if os.isfile(file_path) and os.access(file_path, os.X_OK):
+            return file_path
+
+    return None
+
+
+
+
 BUILTINS = {
     "exit" : cmd_exit,
     "echo" : lambda *args: print(" ".join(args)),
@@ -56,7 +82,11 @@ def main():
             if userCommand in BUILTINS:
                 BUILTINS[userCommand](*args)
             else:
-                print(f"{userCommand}: not found")
+               executable = find_executable(userCommand)
+               if executable:
+                    subprocess.run([executable_path] + args)
+               else:
+                    print(f"{userCommand}: command not found")
         except KeyboardInterrupt:
                 print()
         except Exception as e:
