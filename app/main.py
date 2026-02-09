@@ -132,7 +132,7 @@ def main():
 
             else:
                executable_path = find_executable(userCommand)
-               if executable_path:
+                if executable_path:
                     if output_file:
                         with open(output_file, 'w') as f:
                             subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
