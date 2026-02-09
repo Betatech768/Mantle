@@ -140,7 +140,7 @@ def main():
                else:
                     subprocess.run([userCommand] + args, executable=executable_path)
                     
-                else:
+               else:
                     print(f"{userCommand}: not found")
         except KeyboardInterrupt:
                 print()
