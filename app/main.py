@@ -72,6 +72,8 @@ def change_directory(*args):
         return 
     directory = args[0]
     try:
+        if directory == "~":
+            os.
         os.chdir(directory)
     except FileNotFoundError:
         print(f"cd: {directory}: No such file or directory")
