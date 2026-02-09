@@ -52,7 +52,7 @@ def find_executable(command):
 
         file_path = os.path.join(directory, file_name)
 
-        if os.isfile(file_path) and os.access(file_path, os.X_OK):
+        if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
             return file_path
 
     return None
