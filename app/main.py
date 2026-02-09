@@ -124,7 +124,7 @@ def main():
                         original_stdout = sys.stdout
                         sys.stdout = f
                         try:
-                            BUILINS[userCommand](*args)
+                            BUILTINS[userCommand](*args)
                         finally:
                             sys.stdout = original_stdout
                 else:
