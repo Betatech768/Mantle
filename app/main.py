@@ -105,11 +105,11 @@ def main():
             if not command:
                 continue 
 
-
+            output_file = None
             if ">" in command:
-                part = command.split(">", 1)
-                command = part[0].strip()
-                output_file = part[1].strip()
+                parts = command.split(">", 1)
+                command = parts[0].strip()
+                output_file = parts[1].strip()
 
                 if command.endswith('1'):
                     command = command[:-1].strip()
@@ -119,16 +119,16 @@ def main():
             args = parts[1:]
 
             if userCommand in BUILTINS:
-                BUILTINS[userCommand](*args)
-
                 if output_file:
                     with open(output_file, 'w') as f:
                         original_stdout = sys.stdout
                         sys.stdout = f
-                    try:
-                        BUILINS[userCommand](*args)
-                    finally:
-                        sys.stdout = original_stdout
+                        try:
+                            BUILINS[userCommand](*args)
+                        finally:
+                            sys.stdout = original_stdout
+                else:
+                    BUILTINS[userCommand](*args)
 
             else:
                 executable_path = find_executable(userCommand)
