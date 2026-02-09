@@ -6,7 +6,7 @@ BUILTINS = {
     "echo" : lambda *args: print(" ".join(args)),
     "help" : lambda: print("available commands exit, help, echo, clear"),
     "clear": lambda: print("\033c", end= "")
-    if sys.platform ="win32"
+    if sys.platform !="win32"
     else os.system('cls'),
 }
 
