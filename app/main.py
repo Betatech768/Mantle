@@ -74,11 +74,11 @@ def change_directory(*args):
     try:
         os.chdir(directory)
     except FileNotFoundError:
-        print(f" cd: {directory}: No such file or directory")
+        print(f"cd: {directory}: No such file or directory")
     except NotADirectoryError:
-        print(f" cd: {directory}: Not a directory")
+        print(f"cd: {directory}: Not a directory")
     except PermissionError:
-        print(f" cd: {directory}: Permmission denied")
+        print(f"cd: {directory}: Permmission denied")
     pass
 
 
