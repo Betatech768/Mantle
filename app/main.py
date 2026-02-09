@@ -24,6 +24,7 @@ def main():
     # TODO: Uncomment the code below to pass the first stage
    while True:
     try:
+        sys.stdout("$")
         command = input('$ ').strip()
         if not command:
             continue 
