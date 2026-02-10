@@ -162,7 +162,7 @@ def main():
                             with open(output_file, 'w') as f:
                                 subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
                         else:
-                        subprocess.run([userCommand] + args, executable=executable_path)
+                            subprocess.run([userCommand] + args, executable=executable_path)
                 else:
                         print(f"{userCommand}: not found")
         except KeyboardInterrupt:
