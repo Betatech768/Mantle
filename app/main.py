@@ -2,6 +2,7 @@ import sys
 import os
 import shlex
 import subprocess
+import readline
 
 def cmd_exit():
     sys.exit(0)
@@ -12,6 +13,24 @@ def cmd_clear():
     else:
         os.system('cls')
 
+
+def completer(text, state):
+    autocomplete_commands = ['echo', 'exit']
+
+    options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
+
+    if state < le(options):
+        return options[state] + ' '
+    else:
+        return None
+
+
+def setup_readline():
+    readline.set_completer(completer)
+
+    readline.parse_and_bind('tab: complete')
+
+    readline.set_completer_delims('\t\n;')
 
 def cmd_type(*args):
     if not args:
@@ -100,7 +119,9 @@ BUILTINS = {
 
 def main():
     # TODO: Uncomment the code below to pass the first stage
-   while True:
+
+    setup_readline()
+    while True:
         try:
             command = input('$ ').strip()
             if not command:
