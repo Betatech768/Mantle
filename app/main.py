@@ -157,16 +157,11 @@ def main():
                     if executable_path:
                         if redirect_err:
                             with open(output_file, 'w') as f:
-                                subprocess.run([userCommand] + args, 
-                                    executable=executable_path, stderr=f
-                                    )
-                        if redirect_stdout:
+                                subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
+                        elif redirect_stdout:
                             with open(output_file, 'w') as f:
-                                subprocess.run([userCommand] + args, 
-                                    executable=executable_path, stdout=f
-                                    )
-                                
-                    else:
+                                subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
+                        else:
                         subprocess.run([userCommand] + args, 
                                     executable=executable_path, 
                                     )
