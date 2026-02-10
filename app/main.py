@@ -127,7 +127,7 @@ def main():
                             error_message_stderr = sys.stderr
                             sys.stderr = f
                             try:
-                            BUILTINS[userCommand](*args)
+                                BUILTINS[userCommand](*args)
                 else:
                     BUILTINS[userCommand](*args)
                 if output_file:
