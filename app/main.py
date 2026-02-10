@@ -16,6 +16,7 @@ def cmd_clear():
 def cmd_type(*args):
     if not args:
         print(f"type: missing arguement")
+        return
     command = args[0]
 
     if command in BUILTINS:
@@ -119,7 +120,7 @@ def main():
                 elif "1>" in command:
                     parts = command.split('1>', 1)
                     command = parts[0].strip()
-                    output_file= part[1].strip 
+                    output_file= parts[1].strip()
                     redirect_stdout = True
                 else:
                     parts = command.split('>', 1)
@@ -127,42 +128,41 @@ def main():
                     output_file = parts[1].strip()
                     redirect_stdout = True
 
-                parts = shlex.split(command)
-                userCommand = parts[0]
-                args = parts[1:]
+            parts = shlex.split(command)
+            userCommand = parts[0]
+            args = parts[1:]
 
             if userCommand in BUILTINS:
-                    if redirect_err and output_file:
-                        with open(output_file, 'w') as f:
-                            original_error_stderr = sys.stderr
-                            sys.stderr = f
-                            try:
-                                BUILTINS[userCommand](*args)
-                            finally:
-                                sys.stderr = original_error_stderr
-                    elif redirect_stdout and output_file:
-                        with open(output_file, 'w') as f:
-                            original_stdout = sys.stdout
-                            sys.stdout = f
-                            try:
-                                BUILTINS[userCommand](*args)
-                            finally:
-                                sys.stdout = original_stdout
-                    else:
-                        BUILTINS[userCommand](*args)
+                if redirect_err and output_file:
+                    with open(output_file, 'w') as f:
+                        original_error_stderr = sys.stderr
+                        sys.stderr = f
+                        try:
+                            BUILTINS[userCommand](*args)
+                        finally:
+                            sys.stderr = original_error_stderr
+                elif redirect_stdout and output_file:
+                    with open(output_file, 'w') as f:
+                        original_stdout = sys.stdout
+                        sys.stdout = f
+                        try:
+                            BUILTINS[userCommand](*args)
+                        finally:
+                            sys.stdout = original_stdout
+                else:
+                    BUILTINS[userCommand](*args)
 
             else:
                 executable_path = find_executable(userCommand)
                 if executable_path:
-                    if executable_path:
-                        if redirect_err:
-                            with open(output_file, 'w') as f:
-                                subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
-                        elif redirect_stdout:
-                            with open(output_file, 'w') as f:
-                                subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
-                        else:
-                            subprocess.run([userCommand] + args, executable=executable_path)
+                    if redirect_err:
+                        with open(output_file, 'w') as f:
+                            subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
+                    elif redirect_stdout:
+                        with open(output_file, 'w') as f:
+                            subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
+                    else:
+                        subprocess.run([userCommand] + args, executable=executable_path)
                 else:
                         print(f"{userCommand}: not found")
         except KeyboardInterrupt:
