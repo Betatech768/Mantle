@@ -155,11 +155,21 @@ def main():
                 executable_path = find_executable(userCommand)
                 if executable_path:
                     if executable_path:
-                        stderr_arg = open(output_file, 'w') if redirect_err else None 
-                        stdout_arg = open(output_file, 'w') if redirect_stdout else None 
-                    subprocess.run([userCommand] + args, 
+                        if redirect_err:
+                            with open(output_file, 'w') as f:
+                                subprocess.run([userCommand] + args, 
+                                    executable=executable_path, stderr=f
+                                    )
+                        if redirect_stdout:
+                            with open(output_file, 'w') as f:
+                                subprocess.run([userCommand] + args, 
+                                    executable=executable_path, stdout=f
+                                    )
+                                
+                    else:
+                        subprocess.run([userCommand] + args, 
                                     executable=executable_path, 
-                                    stdout=stdout_arg, stderr=stderr_arg)
+                                    )
                 else:
                         print(f"{userCommand}: not found")
         except KeyboardInterrupt:
