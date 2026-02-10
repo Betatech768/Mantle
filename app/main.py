@@ -52,7 +52,7 @@ def completer(text, state):
     executables = get_executable_name()
     commands = ['echo', 'exit']
 
-    autocomplete_commands = executables + command 
+    autocomplete_commands = executables + commands
 
     options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
 
