@@ -106,49 +106,60 @@ def main():
                 continue 
 
             output_file = None
-            if ">" in command:
-                parts = command.split(">", 1)
-                command = parts[0].strip()
-                output_file = parts[1].strip()
+            redirect_err = False
+            redirect_stdout = False 
 
-                if command.endswith('1'):
-                    command = command[:-1].strip()
-                if command.endswith('2'):
-                    command = command[:-1].strip()
-            
-            parts = shlex.split(command)
-            userCommand = parts[0]
-            args = parts[1:]
+
+            if ">" in command:
+                if "2>" in command:
+                    parts = command.split('2>', 1)
+                    command = parts[0].strip()
+                    output_file = parts[1].strip()
+                    redirect_err = True
+                elif "1>" in command:
+                    parts = command.split('1>', 1)
+                    command = parts[0].strip()
+                    output_file= part[1].strip 
+                    redirect_stdout = True
+                else:
+                    parts = command.split('>', 1)
+                    command = parts[0].strip()
+                    output_file = parts[1].strip()
+                    redirect_stdout = True
+
+                parts = shlex.split(command)
+                userCommand = parts[0]
+                args = parts[1:]
 
             if userCommand in BUILTINS:
-                if command.endwith('2'):
-                    if output_file:
+                    if redirect_err and output_file:
                         with open(output_file, 'w') as f:
-                            error_message_stderr = sys.stderr
+                            original_error_stderr = sys.stderr
                             sys.stderr = f
                             try:
                                 BUILTINS[userCommand](*args)
-                else:
-                    BUILTINS[userCommand](*args)
-                if output_file:
-                    with open(output_file, 'w') as f:
-                        original_stdout = sys.stdout
-                        sys.stdout = f
-                        try:
-                            BUILTINS[userCommand](*args)
-                        finally:
-                            sys.stdout = original_stdout
-                else:
-                    BUILTINS[userCommand](*args)
+                            finally:
+                                sys.stderr = original_error_stderr
+                    elif redirect_stdout and output_file:
+                        with open(output_file, 'w') as f:
+                            original_stdout = sys.stdout
+                            sys.stdout = f
+                            try:
+                                BUILTINS[userCommand](*args)
+                            finally:
+                                sys.stdout = original_stdout
+                    else:
+                        BUILTINS[userCommand](*args)
 
             else:
                 executable_path = find_executable(userCommand)
                 if executable_path:
-                        if output_file:
-                            with open(output_file, 'w') as f:
-                                subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
-                        else:
-                            subprocess.run([userCommand] + args, executable=executable_path)
+                    if executable_path:
+                        stderr_arg = open(output_file, 'w') if redirect_err else None 
+                        stdout_arg = open(output_file, 'w') if redirect_stdout else None 
+                    subprocess.run([userCommand] + args, 
+                                    executable=executable_path, 
+                                    stdout=stdout_arg, stderr=stderr_arg)
                 else:
                         print(f"{userCommand}: not found")
         except KeyboardInterrupt:
