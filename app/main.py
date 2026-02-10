@@ -19,7 +19,7 @@ def completer(text, state):
 
     options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
 
-    if state < le(options):
+    if state < len(options):
         return options[state] + ' '
     else:
         return None
