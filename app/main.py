@@ -113,12 +113,23 @@ def main():
 
                 if command.endswith('1'):
                     command = command[:-1].strip()
+                if command.endswith('2'):
+                    command = command[:-1].strip()
             
             parts = shlex.split(command)
             userCommand = parts[0]
             args = parts[1:]
 
             if userCommand in BUILTINS:
+                if command.endwith('2'):
+                    if output_file:
+                        with open(output_file, 'w') as f:
+                            error_message_stderr = sys.stderr
+                            sys.stderr = f
+                            try:
+                            BUILTINS[userCommand](*args)
+                else:
+                    BUILTINS[userCommand](*args)
                 if output_file:
                     with open(output_file, 'w') as f:
                         original_stdout = sys.stdout
