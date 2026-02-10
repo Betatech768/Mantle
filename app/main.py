@@ -4,6 +4,8 @@ import shlex
 import subprocess
 import readline
 
+_EXECUTABLE_CACHE = None
+
 def cmd_exit():
     sys.exit(0)
 
@@ -14,8 +16,43 @@ def cmd_clear():
         os.system('cls')
 
 
+
+def get_executable_name():
+
+    global _EXECUTABLE_CACHE
+
+    if _EXECUTABLE_CACHE is not None:
+        return _EXECUTABLE_CACHE
+
+    executable = set()
+    path_env = os.environ.get('PATH', '')
+    separator = ";" if sys.platform == 'win32' else ":"
+    directories = path_env.split(separator)
+
+    for directory in directories:
+
+        try:
+            if not os.path.isdir(directory):
+                continue 
+            
+            for filename in os.listdir(directory):
+                full_path = os.path.join(directory, filename)
+                
+                if os.path.isfile(full_path) and os.access(full_path, os.X.OK):
+                    executable.add(filename)
+        except(FileNotFoundError, PermissionError, OSError):
+            continue
+
+    return list(executable)
+
+
+
 def completer(text, state):
-    autocomplete_commands = ['echo', 'exit']
+
+    executables = get_executable_name()
+    commands = ['echo', 'exit']
+
+    autocomplete_commands = executables + command 
 
     options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
 
