@@ -109,24 +109,28 @@ def main():
             output_file = None
             redirect_err = False
             redirect_stdout = False 
+            update_file = False 
 
-
-            if ">" in command:
+            if ">>" in command:
+                update_file= True
+                if "1>>" in command:
+                    parts = command.split('1>>', 1)
+                else:
+                    parts = command.split('>>', 1)
+                command = parts[0].strip()
+                output_file = parts[1].strip()
+            elif ">" in command:
                 if "2>" in command:
                     parts = command.split('2>', 1)
-                    command = parts[0].strip()
-                    output_file = parts[1].strip()
                     redirect_err = True
                 elif "1>" in command:
-                    parts = command.split('1>', 1)
-                    command = parts[0].strip()
-                    output_file= parts[1].strip()
+                    parts = command.split('1>', 1)                    
                     redirect_stdout = True
                 else:
                     parts = command.split('>', 1)
-                    command = parts[0].strip()
-                    output_file = parts[1].strip()
                     redirect_stdout = True
+                command = parts[0].strip()
+                output_file = parts[1].strip()
 
             parts = shlex.split(command)
             userCommand = parts[0]
@@ -143,6 +147,14 @@ def main():
                             sys.stderr = original_error_stderr
                 elif redirect_stdout and output_file:
                     with open(output_file, 'w') as f:
+                        original_stdout = sys.stdout
+                        sys.stdout = f
+                        try:
+                            BUILTINS[userCommand](*args)
+                        finally:
+                            sys.stdout = original_stdout
+                elif update_file and output_file:
+                    with open(output_file, 'a') as f:
                         original_stdout = sys.stdout
                         sys.stdout = f
                         try:
