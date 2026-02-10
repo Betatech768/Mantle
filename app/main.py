@@ -113,10 +113,15 @@ def main():
 
             if ">>" in command:
                 update_file= True
-                if "1>>" in command:
+                if "2>>" in command:
+                    parts = command.split("2>>", 1)
+                    redirect_err= True
+                elif "1>>" in command:
                     parts = command.split('1>>', 1)
+                    redirect_stdout = True
                 else:
                     parts = command.split('>>', 1)
+                    redirect_stdout = True
                 command = parts[0].strip()
                 output_file = parts[1].strip()
             elif ">" in command:
@@ -138,7 +143,8 @@ def main():
 
             if userCommand in BUILTINS:
                 if redirect_err and output_file:
-                    with open(output_file, 'w') as f:
+                    mode = 'a' if update_file else "w"
+                    with open(output_file, mode) as f:
                         original_error_stderr = sys.stderr
                         sys.stderr = f
                         try:
@@ -146,15 +152,7 @@ def main():
                         finally:
                             sys.stderr = original_error_stderr
                 elif redirect_stdout and output_file:
-                    with open(output_file, 'w') as f:
-                        original_stdout = sys.stdout
-                        sys.stdout = f
-                        try:
-                            BUILTINS[userCommand](*args)
-                        finally:
-                            sys.stdout = original_stdout
-                elif update_file and output_file:
-                    with open(output_file, 'a') as f:
+                    with open(output_file, mode) as f:
                         original_stdout = sys.stdout
                         sys.stdout = f
                         try:
@@ -163,19 +161,17 @@ def main():
                             sys.stdout = original_stdout
                 else:
                     BUILTINS[userCommand](*args)
-
             else:
                 executable_path = find_executable(userCommand)
                 if executable_path:
-                    if redirect_err:
-                        with open(output_file, 'w') as f:
-                            subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
-                    elif redirect_stdout:
-                        with open(output_file, 'w') as f:
-                            subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
-                    elif output_file:
-                        with open(output_file, 'w') as f:
-                            subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
+                    if output_file:
+                        mode = 'a' if update_file else "w"
+                        if redirect_err:
+                            with open(output_file, 'w') as f:
+                                subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
+                        elif redirect_stdout:
+                            with open(output_file, 'w') as f:
+                                subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
                     else:
                         subprocess.run([userCommand] + args, executable=executable_path)
                 else:
