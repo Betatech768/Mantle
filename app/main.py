@@ -152,6 +152,7 @@ def main():
                         finally:
                             sys.stderr = original_error_stderr
                 elif redirect_stdout and output_file:
+                    mode = 'a' if update_file else "w"
                     with open(output_file, mode) as f:
                         original_stdout = sys.stdout
                         sys.stdout = f
@@ -167,13 +168,11 @@ def main():
                     if output_file:
                         mode = 'a' if update_file else "w"
                         if redirect_err:
-                            with open(output_file, 'w') as f:
+                            with open(output_file, mode) as f:
                                 subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
-                        elif redirect_stdout:
-                            with open(output_file, 'w') as f:
+                        else:  
+                            with open(output_file, mode) as f:
                                 subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
-                    else:
-                        subprocess.run([userCommand] + args, executable=executable_path)
                 else:
                         print(f"{userCommand}: not found")
         except KeyboardInterrupt:
