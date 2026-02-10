@@ -173,6 +173,9 @@ def main():
                     elif redirect_stdout:
                         with open(output_file, 'w') as f:
                             subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
+                    elif output_file:
+                        with open(output_file, 'w') as f:
+                            subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
                     else:
                         subprocess.run([userCommand] + args, executable=executable_path)
                 else:
