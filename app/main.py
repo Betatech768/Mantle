@@ -161,7 +161,7 @@ def find_executable(command):
 def executable_pipeline(command):
     """Execute a pipeline of two commands"""
 
-    commands = command.spli('|')
+    commands = command.split('|')
 
     cmd1 = commands[0].strip()
     cmd2 = commands[1].strip()
