@@ -50,7 +50,7 @@ def get_executable_name():
     _EXECUTABLE_CACHE = sorted(list(executable))
     return _EXECUTABLE_CACHE
 
-def display_matches(matches, substitution, longest_match_length):
+def display_matches(substitution, matches, longest_match_length):
     """"custom display function for showing multiple matches called by readline when there are multiple completions."""
 
     print() # New Line 
@@ -71,16 +71,17 @@ def completer(text, state):
     """
     Autocomplete function for readline.
     Handle bell ringing on first TAB for multiple matches.
-    """"
+    """
 
     global _COMPLETION_ATTEMPT_COUNT, _LAST_COMPLETION_TEXT
-    commands = list(BUILTINS.key())
+    commands = list(BUILTINS.keys())
     executables = get_executable_name()
 
     autocomplete_commands = executables + commands
 
     options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
-
+    options.sort()
+    
     if state == 0:
         # New Completion attempt 
         if text == _LAST_COMPLETION_TEXT:
@@ -105,7 +106,7 @@ def setup_readline():
 
     readline.parse_and_bind('tab: complete')
 
-    readline.set_completer_delims('\t\n;')
+    readline.set_completer_delims(' \t\n;')
 
     readline.set_completion_display_matches_hook(display_matches)
 
