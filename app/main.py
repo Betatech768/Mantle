@@ -273,8 +273,10 @@ def main():
             update_file = False 
 
 
-            if "|" in command:
-                executable_pipeline(command)
+             # Check for pipeline BEFORE checking for redirection
+            if '|' in command:
+                # Handle pipeline
+                execute_pipeline(command)
                 continue
 
             if ">>" in command:
