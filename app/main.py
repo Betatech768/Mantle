@@ -180,7 +180,7 @@ def executable_pipeline(command):
     for i, cmd in enumerate(commands):
 
         cmd = cmd.strip()
-        parts = shlex.plit(cmd)
+        parts = shlex.split(cmd)
         executable_name = parts[0]
         args = parts[1:]
 
