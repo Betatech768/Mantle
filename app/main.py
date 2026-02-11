@@ -51,7 +51,7 @@ def get_executable_name():
     return _EXECUTABLE_CACHE
 
 def display_matches(substitution, matches, longest_match_length):
-    """"custom display function for showing multiple matches called by readline when there are multiple completions."""
+    """Custom display function for showing multiple matches called by readline when there are multiple completions."""
 
     print() # New Line 
 
@@ -81,7 +81,7 @@ def completer(text, state):
 
     options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
     options.sort()
-    
+
     if state == 0:
         # New Completion attempt 
         if text == _LAST_COMPLETION_TEXT:
