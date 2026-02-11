@@ -180,7 +180,7 @@ def executable_pipeline(command):
     # Parse second command 
     parts2 = shlex.split(cmd2)
     program2 = parts2[0]
-    args2 = parts[1:]
+    args2 = parts2[1:]
 
     executable1 = find_executable(program1)
     executable2 = find_executable(program2)
@@ -202,6 +202,8 @@ def executable_pipeline(command):
 
         os.dup2(write_fd, 1)
         os.close(write_fd)
+        os.execv(executable1, [program1] + args1)
+
 
     pid2 = os.fork()
 
@@ -276,7 +278,7 @@ def main():
             # Check for pipeline BEFORE checking for redirection
             if '|' in command:
                 # Handle pipeline
-                execute_pipeline(command)
+                executable_pipeline(command)
                 continue
 
             if ">>" in command:
