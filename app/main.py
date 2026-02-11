@@ -164,7 +164,7 @@ def executable_pipeline(command):
     commands = command.split('|')
 
 
-    if len(command) != 2:
+    if len(commands) != 2:
         print("Error: Only two-command pipeines are supported")
         return 
 
