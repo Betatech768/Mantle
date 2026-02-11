@@ -174,50 +174,59 @@ def executable_pipeline(command):
 
     commands = command.split('|')
 
+    pids = []
+    prev_read_fd = None
 
-    if len(commands) != 2:
-        print("Error: Only two-command pipeines are supported")
-        return 
+    for i, cmd in enumerate(commands):
 
-    cmd1 = commands[0].strip()
-    cmd2 = commands[1].strip()
+        cmd = cmd.strip()
+        parts = shlex.plit(cmd)
+        executable_name = parts[0]
+        args = parts[1:]
 
-    # Parse first command 
-    parts1 = shlex.split(cmd1)
-    program1 = parts1[0]
-    args1 = parts1[1:]
+        is_last = (i == len(commands) - 1)
+
+        if not is_last:
+            read_fd, write_fd = os.pipe()
+        else:
+            read_fd = write_fd = None 
+
+        pid = os.fork()
+
+        if pid == 0:
+            if prev_read_fd is not None:
+                os.dup2(prev_read_fd, 0)
+
+            if not is_last:
+                os.dup2(write_fd, 1)
+
+            if prev_read is not None:
+                os.close(prev_read_fd)
+            
+            if not is_last:
+                os.close(read_fd)
+                os.close(write_fd)
+            
+
+            if is_builtin(argv[0]):
+                run_builtin(argv)
+                os._exit(0)
+            else:
+                os.execv(executable, argv)
+        else:
+            pids.append(pid)
+
+            if prev_read_fd is not None:
+                os.close(prev_read_fd)
+            
+            if not is_last:
+                os.close(write_fd)
+
+            prev_read_fd = read_fd
 
 
-    # Parse second command 
-    parts2 = shlex.split(cmd2)
-    program2 = parts2[0]
-    args2 = parts2[1:]
 
     
-    read_fd, write_fd = os.pipe()
-
-
-    pid1 = os.fork()
-
-    if pid1 == 0:
-        os.close(read_fd)
-        os.dup2(write_fd, 1)
-        os.close(write_fd)
-        run_command_in_child(program1, args1)
-
-    pid2 = os.fork()
-
-    if pid2 == 0:
-        os.close(write_fd)
-        os.dup2(read_fd, 0)
-        os.close(read_fd)
-        run_command_in_child(program2, args2)
-    
-    os.close(read_fd)
-    os.close(write_fd)
-
-    os.waitpid(pid1, 0)
-    os.waitpid(pid2, 0) 
 
 
 # Print Current Working Directory
