@@ -35,7 +35,6 @@ def get_executable_name():
     directories = path_env.split(separator)
 
     for directory in directories:
-
         try:
             if not os.path.isdir(directory):
                 continue 
@@ -94,7 +93,7 @@ def completer(text, state):
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
-    # Return thr match at index 'state' with trailing space
+    # Return the match at index 'state' with trailing space
     if state < len(options):
         return options[state] + ' '
     else:
@@ -158,6 +157,18 @@ def find_executable(command):
     return None
 
 
+def run_command_in_child(cmd, args):
+    if cmd in BUILTINS:
+        BUILTINS[cmd](*args)
+        os._exit(0)
+    else:
+        executable = find_executable(cmd)
+        if not executable:
+            print(f"{cmd}: command not found")
+            os._exit(127)
+        os.execv(executable, [cmd] + args)
+
+
 def executable_pipeline(command):
     """Execute a pipeline of two commands"""
 
@@ -182,15 +193,6 @@ def executable_pipeline(command):
     program2 = parts2[0]
     args2 = parts2[1:]
 
-    executable1 = find_executable(program1)
-    executable2 = find_executable(program2)
-
-    if not executable1:
-        print(f"{program1}: command not found")
-        return 
-    if not executable2:
-        print(f"{program2}: command not found")
-        return
     
     read_fd, write_fd = os.pipe()
 
@@ -199,21 +201,17 @@ def executable_pipeline(command):
 
     if pid1 == 0:
         os.close(read_fd)
-
         os.dup2(write_fd, 1)
         os.close(write_fd)
-        os.execv(executable1, [program1] + args1)
-
+        run_command_in_child(program1, args1)
 
     pid2 = os.fork()
 
     if pid2 == 0:
         os.close(write_fd)
-
         os.dup2(read_fd, 0)
         os.close(read_fd)
-
-        os.execv(executable2, [program2] + args2)
+        run_command_in_child(program2, args1)
     
     os.close(read_fd)
     os.close(write_fd)
