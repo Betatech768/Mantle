@@ -163,6 +163,11 @@ def executable_pipeline(command):
 
     commands = command.split('|')
 
+
+    if len(command) != 2:
+        print("Error: Only two-command pipeines are supported")
+        return 
+
     cmd1 = commands[0].strip()
     cmd2 = commands[1].strip()
 
@@ -186,6 +191,7 @@ def executable_pipeline(command):
     if not executable2:
         print(f"{program2}: command not found")
         return
+    
     read_fd, write_fd = os.pipe()
 
 
@@ -200,12 +206,12 @@ def executable_pipeline(command):
     pid2 = os.fork()
 
     if pid2 == 0:
-        os.closw(write_fd)
+        os.close(write_fd)
 
         os.dup2(read_fd, 0)
         os.close(read_fd)
 
-        os.execv(executable2, [program2] + args)
+        os.execv(executable2, [program2] + args2)
     
     os.close(read_fd)
     os.close(write_fd)
