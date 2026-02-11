@@ -12,7 +12,7 @@ _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
 def cmd_exit():
-    sys.exit(0)
+    os._exit(0)
 
 def cmd_clear():
     if sys.platform != "win32":
@@ -211,7 +211,7 @@ def executable_pipeline(command):
         os.close(write_fd)
         os.dup2(read_fd, 0)
         os.close(read_fd)
-        run_command_in_child(program2, args1)
+        run_command_in_child(program2, args2)
     
     os.close(read_fd)
     os.close(write_fd)
