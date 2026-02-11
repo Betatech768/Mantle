@@ -6,6 +6,11 @@ import readline
 
 _EXECUTABLE_CACHE = None
 
+# Track last completion attempt for bell ringing
+
+_LAST_COMPLETION_TEXT = None
+_COMPLETION_ATTEMPT_COUNT = 0
+
 def cmd_exit():
     sys.exit(0)
 
@@ -42,20 +47,53 @@ def get_executable_name():
                     executable.add(filename)
         except(FileNotFoundError, PermissionError, OSError):
             continue
+    _EXECUTABLE_CACHE = sorted(list(executable))
+    return _EXECUTABLE_CACHE
 
-    return list(executable)
+def display_matches(matches, substitution, longest_match_length):
+    """"custom display function for showing multiple matches called by readline when there are multiple completions."""
 
+    print() # New Line 
 
+    # Sort matches alphabetically 
+    sorted_matches = sorted(matches)
+
+    # print matches separated by two spaces
+
+    print("  ".join(sorted_matches))
+
+    # Reprint the propmt and current input 
+    print(f"$ {readline.get_line_buffer()}", end="", flush=True)
+
+    
 
 def completer(text, state):
+    """
+    Autocomplete function for readline.
+    Handle bell ringing on first TAB for multiple matches.
+    """"
 
+    global _COMPLETION_ATTEMPT_COUNT, _LAST_COMPLETION_TEXT
+    commands = list(BUILTINS.key())
     executables = get_executable_name()
-    commands = ['echo', 'exit']
 
     autocomplete_commands = executables + commands
 
     options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
 
+    if state == 0:
+        # New Completion attempt 
+        if text == _LAST_COMPLETION_TEXT:
+            _COMPLETION_ATTEMPT_COUNT += 1
+        else:
+            _LAST_COMPLETION_TEXT = text 
+            _COMPLETION_ATTEMPT_COUNT = 1
+        # Ring Bell on first TAB if multiple matches 
+        if _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
+            sys.stdout.write('\x07')
+            sys.stdout.flush()
+
+    # Return thr match at index 'state' with trailing space
     if state < len(options):
         return options[state] + ' '
     else:
@@ -68,6 +106,8 @@ def setup_readline():
     readline.parse_and_bind('tab: complete')
 
     readline.set_completer_delims('\t\n;')
+
+    readline.set_completion_display_matches_hook(display_matches)
 
 def cmd_type(*args):
     if not args:
