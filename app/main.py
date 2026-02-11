@@ -197,7 +197,7 @@ def executable_pipeline(command):
 
     pid1 = os.fork()
 
-    if pid1 ==0 :
+    if pid1 == 0:
         os.close(read_fd)
 
         os.dup2(write_fd, 1)
