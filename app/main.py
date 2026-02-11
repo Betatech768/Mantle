@@ -167,7 +167,7 @@ def executable_pipeline(command):
     cmd2 = commands[1].strip()
 
     # Parse first command 
-    parts1 = shlex.slipt(cmd1)
+    parts1 = shlex.split(cmd1)
     program1 = parts1[0]
     args1 = parts1[1:]
 
@@ -265,6 +265,11 @@ def main():
             redirect_err = False
             redirect_stdout = False 
             update_file = False 
+
+
+            if "|" in command:
+                executable_pipeline(command)
+                continue
 
             if ">>" in command:
                 update_file= True
