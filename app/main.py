@@ -60,7 +60,7 @@ def display_matches(substitution, matches, longest_match_length):
 
     # print matches separated by two spaces
 
-    print("  ".join(sorted_matches))
+    print(" ".join(sorted_matches))
 
     # Reprint the propmt and current input 
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
