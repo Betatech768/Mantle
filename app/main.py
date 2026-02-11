@@ -158,6 +158,62 @@ def find_executable(command):
     return None
 
 
+def executable_pipeline(command):
+    """Execute a pipeline of two commands"""
+
+    commands = command.spli('|')
+
+    cmd1 = commands[0].strip()
+    cmd2 = commands[1].strip()
+
+    # Parse first command 
+    parts1 = shlex.slipt(cmd1)
+    program1 = parts1[0]
+    args1 = parts1[1:]
+
+
+    # Parse second command 
+    parts2 = shlex.split(cmd2)
+    program2 = parts2[0]
+    args2 = parts[1:]
+
+    executable1 = find_executable(program1)
+    executable2 = find_executable(program2)
+
+    if not executable1:
+        print(f"{program1}: command not found")
+        return 
+    if not executable2:
+        print(f"{program2}: command not found")
+        return
+    read_fd, write_fd = os.pipe()
+
+
+    pid1 = os.fork()
+
+    if pid1 ==0 :
+        os.close(read_fd)
+
+        os.dup2(write_fd, 1)
+        os.close(write_fd)
+
+    pid2 = os.fork()
+
+    if pid2 == 0:
+        os.closw(write_fd)
+
+        os.dup2(read_fd, 0)
+        os.close(read_fd)
+
+        os.execv(executable2, [program2] + args)
+    
+    os.close(read_fd)
+    os.close(write_fd)
+
+    os.waitpid(pid1, 0)
+    os.waitpid(pid2, 0) 
+
+
 # Print Current Working Directory
 def get_cwd():
     working_directory = os.getcwd()
