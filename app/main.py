@@ -200,7 +200,7 @@ def executable_pipeline(command):
             if not is_last:
                 os.dup2(write_fd, 1)
 
-            if prev_read is not None:
+            if prev_read_fd is not None:
                 os.close(prev_read_fd)
             
             if not is_last:
