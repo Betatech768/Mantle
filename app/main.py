@@ -38,8 +38,9 @@ def cmd_history(*args):
 
     if limit is not None:
         start_index = max(1, total_items - limit + 1)
+
     for i in range(start_index, total_items + 1):
-        cmd = readline.get_history_items(i)
+        cmd = readline.get_history_item(i)
         print(f"{i:>5} {cmd}")
 
 
