@@ -208,11 +208,11 @@ def executable_pipeline(command):
                 os.close(write_fd)
             
 
-            if is_builtin(argv[0]):
-                run_builtin(argv)
+            if cmd in BUILTINS:
+                BUILTINS[commands](*args)
                 os._exit(0)
             else:
-                os.execv(executable, argv)
+                os.execv(executable, args)
         else:
             pids.append(pid)
 
