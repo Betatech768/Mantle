@@ -208,12 +208,15 @@ def executable_pipeline(command):
                 os.close(write_fd)
             
 
-            if cmd in BUILTINS:
-                BUILTINS[cmd](*args)
+            if executable_name in BUILTINS:
+                BUILTINS[executable_name](*args)
                 os._exit(0)
             else:
-                executable_path = find_executable(cmd)
-                os.execv(executable=executable_path, args)
+                executable_path = find_executable(cmd) 
+                if not executable_path:
+                    print(f"{executable_name}: command not found", file=sys.stderr)
+                    os._exit(127)
+                os.execv(executable_path, [executable_name] + args)
         else:
             pids.append(pid)
 
@@ -224,6 +227,10 @@ def executable_pipeline(command):
                 os.close(write_fd)
 
             prev_read_fd = read_fd
+        
+    for pid in pids:
+        os.waitpid(pid, 0)
+        
 
 
 
