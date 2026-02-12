@@ -25,7 +25,9 @@ def cmd_clear():
 def cmd_history():
     global _CACHED_HISTORY
     if _CACHED_HISTORY is not None:
-        return _CACHED_HISTORY
+        for i, history in enumerate(_CACHED_HISTORY):
+            print(f"{i} {history}")
+    return
 
 def get_executable_name():
 
@@ -287,7 +289,7 @@ BUILTINS = {
     "type": cmd_type,
     "pwd": get_cwd,
     "cd": change_directory,
-    "history": lambda : print("History is a shel builtin"),
+    "history": cmd_history,
 }
 
 def main():
