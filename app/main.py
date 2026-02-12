@@ -31,38 +31,41 @@ def cmd_clear():
         os.system('cls')
 
 def cmd_history(*args):
+    # Check for the '-r' flag
     if args and args[0] == "-r":
         if len(args) < 2:
-            # Handle missing path if necessary
-            return
+            return # Missing path, just return to prompt
         
         history_path = args[1]
         if os.path.exists(history_path):
-            # readline.read_history_file APPENDS the file contents 
-            # to the current in-memory history list.
             try:
+                # This appends the file contents to the current session history
                 readline.read_history_file(history_path)
             except Exception:
+                # If reading fails, we don't want the whole shell to crash
                 pass
-        return
-    total_items = readline.get_current_history_length()
+        return # Return to main loop to show the next prompt
 
-    limit = None 
+    # Standard 'history' or 'history <n>' logic
+    total_items = readline.get_current_history_length()
+    
+    # Check if a numeric limit was provided (e.g., 'history 2')
+    limit = None
     if args:
         try:
             limit = int(args[0])
-        except ValueError:
+        except (ValueError, IndexError):
             pass
-     
 
     start_index = 1
-
     if limit is not None:
         start_index = max(1, total_items - limit + 1)
 
     for i in range(start_index, total_items + 1):
         cmd = readline.get_history_item(i)
-        print(f"{i:>5} {cmd}")
+        if cmd:
+            # Format: '  index  command'
+            print(f"{i:>5}  {cmd}")
 
 
 def get_executable_name():
