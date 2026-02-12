@@ -189,7 +189,7 @@ def executable_pipeline(command):
         
         if not parts:
             continue
-            
+
         executable_name = parts[0]
         args = parts[1:]
 
@@ -221,7 +221,7 @@ def executable_pipeline(command):
                     print(f"Error: {e}", file=sys.stderr)
                     os._exit(1)
             else:
-                executable_path = find_executable(cmd) 
+                executable_path = find_executable(executable_name) 
                 if not executable_path:
                     print(f"{executable_name}: command not found", file=sys.stderr)
                     os._exit(127)
