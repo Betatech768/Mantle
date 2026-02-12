@@ -20,36 +20,21 @@ def cmd_clear():
     else:
         os.system('cls')
 
-def cmd_history(*args):
-    if len(args) == 0:
-        # Display all history
-        history_length = readline.get_current_history_length()
-        
-        for i in range(1, history_length + 1):
-            line = readline.get_history_item(i)
-            if line:
-                print(f"    {i}  {line}")
-    
-    elif len(args) == 2 and args[0] == '-r':
-        # Read history from file
-        filename = args[1]
-        
-        try:
-            with open(filename, 'r') as f:
-                for line in f:
-                    line = line.rstrip('\n')  # Remove newline
-                    if line:  # Only add non-empty lines
-                        readline.add_history(line)
-        except FileNotFoundError:
-            print(f"history: {filename}: No such file or directory")
-        except PermissionError:
-            print(f"history: {filename}: Permission denied")
-        except Exception as e:
-            print(f"history: {filename}: {e}")
-    
-    else:
-        print("history: invalid option or arguments")
-        print("Usage: history [-r filename]")
+def history_cmd(arg1=None, arg2=None):
+    if arg2 and arg1 == "-r":
+        file = arg2
+        readline.read_history_file(file)
+        return
+
+    length = readline.get_current_history_length()
+    limit = length
+
+    if arg1 is not None:
+        limit = int(arg1)
+
+    start = max(1, length - limit + 1)
+    for i in range(start, length + 1):
+        print(f"   {i}  {readline.get_history_item(i)}")
 
 def get_executable_name():
 
@@ -326,7 +311,7 @@ def main():
             if command:
                 readline.add_history(command)
 
-                
+
             if not command:
                 continue 
 
