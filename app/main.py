@@ -209,10 +209,11 @@ def executable_pipeline(command):
             
 
             if cmd in BUILTINS:
-                BUILTINS[commands](*args)
+                BUILTINS[cmd](*args)
                 os._exit(0)
             else:
-                os.execv(executable, args)
+                executable_path = find_executable(cmd)
+                os.execv(executable=executable_path, args)
         else:
             pids.append(pid)
 
