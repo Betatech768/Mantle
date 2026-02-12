@@ -282,6 +282,7 @@ BUILTINS = {
     "type": cmd_type,
     "pwd": get_cwd,
     "cd": change_directory,
+    "history": lambda : print("History is a shel builtin"),
 }
 
 def main():
