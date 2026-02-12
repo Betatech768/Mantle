@@ -143,12 +143,12 @@ def completer(text, state):
         return None
 
 
-# def append_session_history():
-#     # Get how many items were added this session
-#     new_items = readline.get_current_history_length()
-#     if new_items > 0:
-#         # Append history to file
-#         readline.append_history_file(new_items, HISTORY_FILE)
+def append_session_history():
+    # Get how many items were added this session
+    new_items = readline.get_current_history_length()
+    if new_items > 0:
+        # Append history to file
+        readline.append_history_file(new_items, HISTORY_FILE)
 
 
 
