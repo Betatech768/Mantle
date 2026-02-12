@@ -7,22 +7,12 @@ import readline
 _EXECUTABLE_CACHE = None
 
 # Track last completion attempt for bell ringing
-# Path to the history file in the user's home directory
-HISTORY_FILE = os.path.expanduser("~/.custom_shell_history")
 
 _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
-def save_history():
-    # Limit the file size (e.g., last 1000 commands)
-    readline.set_history_length(1000)
-    readline.write_history_file(HISTORY_FILE)
-
-# In your cmd_exit or main try/except:
 def cmd_exit():
-    save_history()
     os._exit(0)
-
 
 def cmd_clear():
     if sys.platform != "win32":
@@ -31,42 +21,35 @@ def cmd_clear():
         os.system('cls')
 
 def cmd_history(*args):
-    # Check for the '-r' flag
-    if args and args[0] == "-r":
-        if len(args) < 2:
-            return # Missing path, just return to prompt
+    if len(args) == 0:
+        # Display all history
+        history_length = readline.get_current_history_length()
         
-        history_path = args[1]
-        if os.path.exists(history_path):
-            try:
-                # This appends the file contents to the current session history
-                readline.read_history_file(history_path)
-            except Exception:
-                # If reading fails, we don't want the whole shell to crash
-                pass
-        return # Return to main loop to show the next prompt
-
-    # Standard 'history' or 'history <n>' logic
-    total_items = readline.get_current_history_length()
+        for i in range(1, history_length + 1):
+            line = readline.get_history_item(i)
+            if line:
+                print(f"    {i}  {line}")
     
-    # Check if a numeric limit was provided (e.g., 'history 2')
-    limit = None
-    if args:
+    elif len(args) == 2 and args[0] == '-r':
+        # Read history from file
+        filename = args[1]
+        
         try:
-            limit = int(args[0])
-        except (ValueError, IndexError):
-            pass
-
-    start_index = 1
-    if limit is not None:
-        start_index = max(1, total_items - limit + 1)
-
-    for i in range(start_index, total_items + 1):
-        cmd = readline.get_history_item(i)
-        if cmd:
-            # Format: '  index  command'
-            print(f"{i:>5}  {cmd}")
-
+            with open(filename, 'r') as f:
+                for line in f:
+                    line = line.rstrip('\n')  # Remove newline
+                    if line:  # Only add non-empty lines
+                        readline.add_history(line)
+        except FileNotFoundError:
+            print(f"history: {filename}: No such file or directory")
+        except PermissionError:
+            print(f"history: {filename}: Permission denied")
+        except Exception as e:
+            print(f"history: {filename}: {e}")
+    
+    else:
+        print("history: invalid option or arguments")
+        print("Usage: history [-r filename]")
 
 def get_executable_name():
 
@@ -146,24 +129,7 @@ def completer(text, state):
         return None
 
 
-def append_session_history():
-    # Get how many items were added this session
-    new_items = readline.get_current_history_length()
-    if new_items > 0:
-        # Append history to file
-        readline.append_history_file(new_items, HISTORY_FILE)
-
-
-
-
-
 def setup_readline():
-
-    if os.path.exists(HISTORY_FILE):
-        try:
-            readline.read_history_file(HISTORY_FILE)
-        except OSError:
-            pass 
     readline.set_completer(completer)
 
     readline.parse_and_bind('tab: complete')
@@ -349,57 +315,99 @@ BUILTINS = {
 }
 
 def main():
+    # TODO: Uncomment the code below to pass the first stage
+
     setup_readline()
-    
     while True:
         try:
-            # The tester looks for this prompt string specifically
-            command_line = input('$ ')
-            
-            if not command_line.strip():
+            command = input('$ ').strip()
+            if not command:
+                continue 
+
+            output_file = None
+            redirect_err = False
+            redirect_stdout = False 
+            update_file = False 
+
+
+            # Check for pipeline BEFORE checking for redirection
+            if '|' in command:
+                # Handle pipeline
+                executable_pipeline(command)
                 continue
 
+            if ">>" in command:
+                update_file= True
+                if "2>>" in command:
+                    parts = command.split("2>>", 1)
+                    redirect_err= True
+                elif "1>>" in command:
+                    parts = command.split('1>>', 1)
+                    redirect_stdout = True
+                else:
+                    parts = command.split('>>', 1)
+                    redirect_stdout = True
+                command = parts[0].strip()
+                output_file = parts[1].strip()
+            elif ">" in command:
+                if "2>" in command:
+                    parts = command.split('2>', 1)
+                    redirect_err = True
+                elif "1>" in command:
+                    parts = command.split('1>', 1)                    
+                    redirect_stdout = True
+                else:
+                    parts = command.split('>', 1)
+                    redirect_stdout = True
+                command = parts[0].strip()
+                output_file = parts[1].strip()
 
-             # 1. Check for Pipeline FIRST
-            if "|" in line:
-                executable_pipeline(line)
-                continue # Move to next prompt after pipeline finishes
-
-
-
-            # Parse the command and arguments
-            parts = shlex.split(command_line)
-            if not parts:
-                continue
-                
-            cmd = parts[0]
+            parts = shlex.split(command)
+            userCommand = parts[0]
             args = parts[1:]
 
-            if cmd in BUILTINS:
-                BUILTINS[cmd](*args)
-            elif "|" in command_line:
-                executable_pipeline(command_line)
-            else:
-                # Execute external command (non-pipeline)
-                executable_path = find_executable(cmd)
-                if executable_path:
-                    # Use subprocess for single external commands to avoid manual forking complexity
-                    subprocess.run([cmd] + args)
+            if userCommand in BUILTINS:
+                if redirect_err and output_file:
+                    mode = 'a' if update_file else "w"
+                    with open(output_file, mode) as f:
+                        original_error_stderr = sys.stderr
+                        sys.stderr = f
+                        try:
+                            BUILTINS[userCommand](*args)
+                        finally:
+                            sys.stderr = original_error_stderr
+                elif redirect_stdout and output_file:
+                    mode = 'a' if update_file else "w"
+                    with open(output_file, mode) as f:
+                        original_stdout = sys.stdout
+                        sys.stdout = f
+                        try:
+                            BUILTINS[userCommand](*args)
+                        finally:
+                            sys.stdout = original_stdout
                 else:
-                    print(f"{cmd}: command not found")
-
-        except EOFError:
-            # User pressed Ctrl+D
-            break
+                    BUILTINS[userCommand](*args)
+            else:
+                executable_path = find_executable(userCommand)
+                if executable_path:
+                    if output_file:
+                        mode = 'a' if update_file else "w"
+                        if redirect_err:
+                            with open(output_file, mode) as f:
+                                subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
+                        else:  
+                            with open(output_file, mode) as f:
+                                subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
+                    else:
+                        subprocess.run([userCommand] + args, executable=executable_path)
+                else:
+                        print(f"{userCommand}: not found")
+        except KeyboardInterrupt:
+                print()
         except Exception as e:
-            # This prevents a single bad command from crashing the whole shell
-            # If the tester sends something weird, we just continue to the next prompt
-            continue
+                print(f"{userCommand} not found, error - {e}")
+                
 
-    # Optional: Save history on clean exit
-    save_history()
 
 if __name__ == "__main__":
     main()
-
-
