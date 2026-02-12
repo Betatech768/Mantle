@@ -180,7 +180,16 @@ def executable_pipeline(command):
     for i, cmd in enumerate(commands):
 
         cmd = cmd.strip()
-        parts = shlex.split(cmd)
+        
+        try:
+            parts = shlex.split(cmd)
+        except Exception as e:
+            print(f"Error parsing command: {e}", file=sys.stderr)
+            return
+        
+        if not parts:
+            continue
+            
         executable_name = parts[0]
         args = parts[1:]
 
@@ -196,27 +205,31 @@ def executable_pipeline(command):
         if pid == 0:
             if prev_read_fd is not None:
                 os.dup2(prev_read_fd, 0)
+                os.close(prev_read_fd)
 
             if not is_last:
                 os.dup2(write_fd, 1)
-
-            if prev_read_fd is not None:
-                os.close(prev_read_fd)
-            
-            if not is_last:
                 os.close(read_fd)
                 os.close(write_fd)
-            
 
+        
             if executable_name in BUILTINS:
-                BUILTINS[executable_name](*args)
-                os._exit(0)
+                try:
+                    BUILTINS[executable_name](*args)
+                    os._exit(0)
+                except Exception as e:
+                    print(f"Error: {e}", file=sys.stderr)
+                    os._exit(1)
             else:
                 executable_path = find_executable(cmd) 
                 if not executable_path:
                     print(f"{executable_name}: command not found", file=sys.stderr)
                     os._exit(127)
-                os.execv(executable_path, [executable_name] + args)
+                try:
+                    os.execv(executable_path, [executable_name] + args)
+                except Exception as e:
+                    print(f"Error executing {executable_name}: {e}", file=sys.stderr)
+                    os._exit(127)
         else:
             pids.append(pid)
 
@@ -225,16 +238,13 @@ def executable_pipeline(command):
             
             if not is_last:
                 os.close(write_fd)
-
-            prev_read_fd = read_fd
+                prev_read_fd = read_fd
         
     for pid in pids:
-        os.waitpid(pid, 0)
-        
-
-
-
-    
+        try:
+            os.waitpid(pid, 0)
+        except OSError:
+            pass
 
 
 # Print Current Working Directory
