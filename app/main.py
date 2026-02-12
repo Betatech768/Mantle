@@ -11,6 +11,8 @@ _EXECUTABLE_CACHE = None
 _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
+_CACHED_HISTORY = []
+
 def cmd_exit():
     os._exit(0)
 
@@ -20,7 +22,10 @@ def cmd_clear():
     else:
         os.system('cls')
 
-
+def cmd_history():
+    global _CACHED_HISTORY
+    if _CACHED_HISTORY is not None:
+        return _CACHED_HISTORY
 
 def get_executable_name():
 
@@ -289,9 +294,11 @@ def main():
     # TODO: Uncomment the code below to pass the first stage
 
     setup_readline()
+    global _CACHED_HISTORY 
     while True:
         try:
             command = input('$ ').strip()
+            _CACHED_HISTORY.append(command)
             if not command:
                 continue 
 
