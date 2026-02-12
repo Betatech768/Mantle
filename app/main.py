@@ -31,6 +31,20 @@ def cmd_clear():
         os.system('cls')
 
 def cmd_history(*args):
+    if args and args[0] == "-r":
+        if len(args) < 2:
+            # Handle missing path if necessary
+            return
+        
+        history_path = args[1]
+        if os.path.exists(history_path):
+            # readline.read_history_file APPENDS the file contents 
+            # to the current in-memory history list.
+            try:
+                readline.read_history_file(history_path)
+            except Exception:
+                pass
+        return
     total_items = readline.get_current_history_length()
 
     limit = None 
