@@ -359,6 +359,14 @@ def main():
             if not command_line.strip():
                 continue
 
+
+             # 1. Check for Pipeline FIRST
+            if "|" in line:
+                executable_pipeline(line)
+                continue # Move to next prompt after pipeline finishes
+
+
+
             # Parse the command and arguments
             parts = shlex.split(command_line)
             if not parts:
