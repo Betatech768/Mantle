@@ -7,15 +7,22 @@ import readline
 _EXECUTABLE_CACHE = None
 
 # Track last completion attempt for bell ringing
+# Path to the history file in the user's home directory
+HISTORY_FILE = os.path.expanduser("~/.custom_shell_history")
 
 _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
-# cached History 
-_CACHED_HISTORY = []
+def save_history():
+    # Limit the file size (e.g., last 1000 commands)
+    readline.set_history_length(1000)
+    readline.write_history_file(HISTORY_FILE)
 
+# In your cmd_exit or main try/except:
 def cmd_exit():
+    save_history()
     os._exit(0)
+
 
 def cmd_clear():
     if sys.platform != "win32":
@@ -120,9 +127,24 @@ def completer(text, state):
         return options[state] + ' '
     else:
         return None
+def append_session_history():
+    # Get how many items were added this session
+    new_items = readline.get_current_history_length()
+    if new_items > 0:
+        # Append history to file
+        readline.append_history_file(new_items, HISTORY_FILE)
+
+
+
 
 
 def setup_readline():
+
+    if os.path.exists(HISTORY_FILE):
+        try:
+            readline.read_history_file(HISTORY_FILE)
+        except OSError:
+            pass 
     readline.set_completer(completer)
 
     readline.parse_and_bind('tab: complete')
@@ -399,6 +421,9 @@ def main():
                 print()
         except Exception as e:
                 print(f"{userCommand} not found, error - {e}")
+        finally:
+            readline.write_history_file(HISTORY_FILE)
+            print("\nHistory saved. Exiting.")
 
 
 if __name__ == "__main__":
