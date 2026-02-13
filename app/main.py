@@ -21,22 +21,70 @@ def cmd_clear():
         os.system('cls')
 
 
-def cmd_history(arg1=None, arg2=None):
-    if arg2 and arg1 == "-r":
-        file = arg2
-        readline.read_history_file(file)
+def cmd_history(*args):
+    """
+    Display or manipulate command history.
+    
+    Usage:
+      history           - Display all history with line numbers
+      history N         - Display last N commands
+      history -r <file> - Read history from file and append to current history
+    """
+    
+    # Case 1: history -r <file>
+    if len(args) == 2 and args[0] == '-r':
+        filename = args[1]
+        
+        try:
+            with open(filename, 'r') as f:
+                for line in f:
+                    line = line.rstrip('\n')  # Remove trailing newline
+                    if line:  # Only add non-empty lines
+                        readline.add_history(line)
+        except FileNotFoundError:
+            print(f"history: {filename}: No such file or directory")
+        except PermissionError:
+            print(f"history: {filename}: Permission denied")
+        except Exception as e:
+            print(f"history: {filename}: {e}")
         return
-
-    length = readline.get_current_history_length()
-    limit = length
-
-    if arg1 is not None:
-        limit = int(arg1)
-
-    start = max(1, length - limit + 1)
-    for i in range(start, length + 1):
-        print(f"   {i}  {readline.get_history_item(i)}")
-
+    
+    # Case 2: history N (display last N commands)
+    if len(args) == 1:
+        try:
+            limit = int(args[0])
+            
+            if limit < 0:
+                print("history: invalid argument")
+                return
+            
+            total_history = readline.get_current_history_length()
+            
+            # Calculate starting position
+            start = max(1, total_history - limit + 1)
+            
+            # Display from start to end
+            for i in range(start, total_history + 1):
+                line = readline.get_history_item(i)
+                if line:
+                    print(f"    {i}  {line}")
+        except ValueError:
+            print("history: numeric argument required")
+        return
+    
+    # Case 3: history (display all history)
+    if len(args) == 0:
+        total_history = readline.get_current_history_length()
+        
+        for i in range(1, total_history + 1):
+            line = readline.get_history_item(i)
+            if line:
+                print(f"    {i}  {line}")
+        return
+    
+    # Invalid usage
+    print("history: invalid option or arguments")
+    print("Usage: history [-r filename] [N]")
 def get_executable_name():
 
     global _EXECUTABLE_CACHE
