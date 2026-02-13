@@ -12,8 +12,7 @@ _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
 def cmd_exit():
-    global _LAST_HISTORY_APPEND_INDEX
-    _LAST_HISTORY_APPEND_INDEX = readline.get_current_history_length()
+    write_history_to_histfile()
     os._exit(0)
 
 def cmd_clear():
@@ -36,6 +35,22 @@ def load_history_from_histfile():
             line = line.rstrip("\n")
             if line.strip():
                 readline.add_history(line)
+
+
+def write_history_to_histfile():
+    histfile = os.environ.get("HISTFILE")
+    if not histfile:
+        return
+
+    if not os.path.exists(histfile):
+        return
+
+    with open(histfile, "w") as f:
+        for i in range(1, history_length + 1):
+            item = readline.get_history_item(i)
+            if item and item.strip():
+                f.write(item + '\n')
+    return 
 
 
 def cmd_history(*args):
@@ -360,7 +375,7 @@ def main():
     setup_readline()
 
     load_history_from_histfile()
-
+    
     # Initialize append cursor to current history length
     global _LAST_HISTORY_APPEND_INDEX
     _LAST_HISTORY_APPEND_INDEX = readline.get_current_history_length()
