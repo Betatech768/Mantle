@@ -55,7 +55,7 @@ def cmd_history(*args):
         history_length = readline.get_current_history_length()
 
         with open(file, "a") as f:
-            for i in range(_LAST_HISTORY_WRITE_INDEX , history_length + 1):
+            for i in range(_LAST_HISTORY_WRITE_INDEX + 1, history_length + 1):
                 item = readline.get_history_item(i)
                 if item and item.strip():
                     f.write(item + '\n')
@@ -341,6 +341,11 @@ def main():
     # TODO: Uncomment the code below to pass the first stage
 
     setup_readline()
+
+    # Initialize append cursor to current history length
+    global _LAST_HISTORY_APPEND_INDEX
+    _LAST_HISTORY_APPEND_INDEX = readline.get_current_history_length()
+   
     while True:
         try:
             command = input('$ ').strip()
