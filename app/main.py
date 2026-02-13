@@ -317,12 +317,7 @@ def main():
     while True:
         try:
             command = input('$ ').strip()
-
-
-            if command:
-                readline.add_history(command)
-
-
+           
             if not command:
                 continue 
 
