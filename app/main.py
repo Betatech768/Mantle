@@ -25,20 +25,20 @@ def cmd_history(*args):
     
     if len(args) == 0:
         history_length = readline.get_current_history_length()
-        for i in range(history_length + 1):
+        for i in range(1, history_length + 1):
             print(f"    {i}  {readline.get_history_item(i)}")
 
-    if len(args) == 2 and "-r" in args:
+    elif len(args) == 2 and args[0] == "-r":
         file = args[1]
-        history = readline.read_history_file(file)
+        readline.read_history_file(file)
         return 
 
-    if len(args) == 1:
-        limit = int(args)
+    elif len(args) == 1:
+        limit = int(args[0])
         history_length = readline.get_current_history_length()
-        start_histroy = max(1, history_length - limit + 1 )
+        start_history = max(1, history_length - limit + 1 )
 
-        for i in range(start_histroy, history_length + 1):
+        for i in range(start_history, history_length + 1):
             print(f"    {i}  {readline.get_history_item(i)}")
 
 
