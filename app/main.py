@@ -30,7 +30,7 @@ def cmd_history(*args):
 
     elif len(args) == 2 and args[0] == "-r":
         file = args[1]
-        with open(filname, "r") as f:
+        with open(file, "r") as f:
             for line in f:
                 line = line.rstrip("\n")
                 if line.strip():
