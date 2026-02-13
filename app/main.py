@@ -22,44 +22,24 @@ def cmd_clear():
 
 
 def cmd_history(*args):
-    if len(args) == 2 and args[0] == "-r":
-        filename = args[1]
-
-        try:
-            with open(filename, 'r') as f:
-                for line in f:
-                    line = line.rstrip('\n')
-                    if line:
-                        readline.add_history(line)
-        except (FileNotFoundError, PermissionError):
-            print(f"history: {filename}: Error Occured")
-        except Exception as e:
-            print(f"history: {filename}: {e}")
-
     
-    # Limit History Display 
+    if len(args) == 0:
+        history_length = readline.get_current_history_length()
+        for i in range(history_length + 1):
+            print(f"    {i}  {readline.get_history_item(i)}")
+
+    if len(args) == 2 and "-r" in args:
+        file = args[1]
+        history = readline.read_history_file(file)
+        return 
 
     if len(args) == 1:
         limit = int(args)
-        length_of_history = readline.get_current_history_length()
-
-        start_history = max(1, length_of_history - limit + 1)
-
-        for i in range(start_history, length_of_history + 1):
-            line = readline.get_history_item(i)
-            if line:
-                print(f"    {i}  {line}")
-
-    
-    # Display all history 
-    if len(args) == 0:
         history_length = readline.get_current_history_length()
+        start_histroy = max(1, history_length - limit + 1 )
 
-        for i in range(1, history_length + 1):
-            line = readline.get_history_item(i)
-            if line:
-                print(f"    {i}  {line}")
-
+        for i in range(start_histroy, history_length + 1):
+            print(f"    {i}  {readline.get_history_item(i)}")
 
 
 
