@@ -151,6 +151,36 @@ def change_directory(*args):
     except Exception as e:
         print(f"cd: {e}")
 
+def cmd_type(*args):
+    if not args:
+        print(f"type: missing arguement")
+        return
+    command = args[0]
+
+    if command in BUILTINS:
+        print(f"{command} is a shell builtin")
+        return 
+    
+    # search in PATH directories
+
+    path_env = os.environ.get('PATH', '')
+    if sys.platform == 'win32':
+        directories = path_env.split(';')
+    else:
+        directories = path_env.split(':')
+        
+
+    for directory in directories:
+        full_path = os.path.join(directory, command)
+
+        if os.path.isfile(full_path):
+            if os.access(full_path, os.X_OK):
+                print(f"{command} is {full_path}")
+                return 
+   
+    print(f"{command} not found")
+
+
 BUILTINS = {
     "exit": cmd_exit,
     "echo": lambda *args: print(" ".join(args)),
@@ -158,6 +188,7 @@ BUILTINS = {
     "pwd": lambda *args: print(os.getcwd()),
     "cd": change_directory,
     "history": cmd_history,
+    "type": cmd_type,
 }
 
 def main():
