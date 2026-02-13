@@ -36,7 +36,17 @@ def cmd_history(*args):
         except Exception as e:
             print(f"history: {filename}: {e}")
     
+    # Display all history 
+    if len(args) == 0:
+        history_length = readline.get_current_history_legnth()
 
+        for i in range(1, history_length + 1):
+            line = readline.get_history_item(i)
+            if line:
+                print(f"    {i}  {line}")
+    
+    print("history: invalid option or arguments")
+    print("Usage: history [-r filename]")
 
 
 
