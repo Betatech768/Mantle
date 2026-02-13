@@ -12,7 +12,18 @@ _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
 def cmd_exit():
-    write_history_to_histfile()
+    histfile = os.environ.get("HISTFILE")
+    if histfile:
+        try:
+            with open(histfile, "w") as f:
+                history_length = readline.get_current_history_length()
+                for i in range(1, history_length + 1):
+                    item = readline.get_history_item(i)
+                    if item and item.strip():
+                        f.write(item + "\n")
+        except Exception as e:
+            print(f"Failed to save history: {e}", file=sys.stderr)
+
     os._exit(0)
 
 def cmd_clear():
@@ -37,22 +48,6 @@ def load_history_from_histfile():
                 readline.add_history(line)
 
 
-def write_history_to_histfile():
-    histfile = os.environ.get("HISTFILE")
-    if not histfile:
-        return
-
-    if not os.path.exists(histfile):
-        return
-    
-    history_length = readline.get_current_history_length()
-
-    with open(histfile, "w") as f:
-        for i in range(1, history_length):
-            item = readline.get_history_item(i)
-            if item and item.strip():
-                f.write(item + '\n')
-    return 
 
 
 def cmd_history(*args):
