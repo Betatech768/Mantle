@@ -48,7 +48,7 @@ def write_history_to_histfile():
     history_length = readline.get_current_history_length()
 
     with open(histfile, "w") as f:
-        for i in range(1, history_length + 1):
+        for i in range(1, history_length):
             item = readline.get_history_item(i)
             if item and item.strip():
                 f.write(item + '\n')
