@@ -21,7 +21,7 @@ def cmd_clear():
         os.system('cls')
 
 
-def history_cmd(arg1=None, arg2=None):
+def cmd_history(arg1=None, arg2=None):
     if arg2 and arg1 == "-r":
         file = arg2
         readline.read_history_file(file)
