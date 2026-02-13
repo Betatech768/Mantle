@@ -7,7 +7,7 @@ import readline
 _EXECUTABLE_CACHE = None
 
 # Track last completion attempt for bell ringing
-
+_LAST_HISTORY_WRITE_INDEX = 0
 _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
 
@@ -22,6 +22,7 @@ def cmd_clear():
 
 
 def cmd_history(*args):
+    global _LAST_HISTORY_WRITE_INDEX
     
     if len(args) == 0:
         history_length = readline.get_current_history_length()
@@ -54,10 +55,13 @@ def cmd_history(*args):
         history_length = readline.get_current_history_length()
 
         with open(file, "a") as f:
-            for i in range(1, history_length + 1):
+            for i in range(_LAST_HISTORY_WRITE_INDEX , history_length + 1):
                 item = readline.get_history_item(i)
                 if item and item.strip():
                     f.write(item + '\n')
+
+        # update cursor AFTER appending
+        _LAST_HISTORY_WRITE_INDEX = history_length
         return 
 
     elif len(args) == 1:
