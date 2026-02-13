@@ -21,6 +21,21 @@ def cmd_clear():
         os.system('cls')
 
 
+def load_history_from_histfile():
+    histfile = os.environ.get("HISTFILE")
+    if not histfile:
+        return
+
+    if not os.path.exists(histfile):
+        return
+
+    with open(histfile, "r") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if line.strip():
+                readline.add_history(line)
+
+
 def cmd_history(*args):
     global _LAST_HISTORY_WRITE_INDEX
     
@@ -342,6 +357,8 @@ def main():
 
     setup_readline()
 
+    load_history_from_histfile()
+    
     # Initialize append cursor to current history length
     global _LAST_HISTORY_APPEND_INDEX
     _LAST_HISTORY_APPEND_INDEX = readline.get_current_history_length()
