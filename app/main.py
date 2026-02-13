@@ -38,7 +38,7 @@ def cmd_history(*args):
     
     # Display all history 
     if len(args) == 0:
-        history_length = readline.get_current_history_legnth()
+        history_length = readline.get_current_history_length()
 
         for i in range(1, history_length + 1):
             line = readline.get_history_item(i)
