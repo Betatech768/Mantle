@@ -42,7 +42,7 @@ def cmd_history(*args):
         history_length = readline.get_current_history_length()
 
         with open(file, "w") as f:
-            for i in range(1, history_length +1):
+            for i in range(1, history_length):
                 item = readline.get_history_item(i)
                 if item and item.strip():
                     f.write(item + '\n')
