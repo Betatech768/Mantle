@@ -44,9 +44,7 @@ def cmd_history(*args):
             line = readline.get_history_item(i)
             if line:
                 print(f"    {i}  {line}")
-    
-    print("history: invalid option or arguments")
-    print("Usage: history [-r filename]")
+
 
 
 
