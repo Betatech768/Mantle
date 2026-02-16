@@ -3,6 +3,9 @@ import os
 import shlex
 import subprocess
 import readline
+import platform
+
+
 
 _EXECUTABLE_CACHE = None
 
@@ -27,7 +30,8 @@ def cmd_exit():
     os._exit(0)
 
 def cmd_clear():
-    if sys.platform != "win32":
+    system_type = platform.system()
+    if system_type != "Windows":
         print('\033c', end = "")
     else:
         os.system('cls')
