@@ -352,7 +352,7 @@ def change_directory(*args):
     except NotADirectoryError:
         print(f"cd: {directory}: Not a directory")
     except PermissionError:
-        print(f"cd: {directory}: Permmission denied")
+        print(f"cd: {directory}: Permission denied")
     pass
 
 
@@ -369,7 +369,6 @@ BUILTINS = {
 }
 
 def main():
-    # TODO: Uncomment the code below to pass the first stage
 
     setup_readline()
 
