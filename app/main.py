@@ -16,6 +16,10 @@ _COMPLETION_ATTEMPT_COUNT = 0
 
 def cmd_exit():
     histfile = os.environ.get("HISTFILE")
+
+    if not histfile:
+        return
+
     if histfile:
         try:
             with open(histfile, "w") as f:
