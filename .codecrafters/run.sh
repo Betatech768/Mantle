@@ -8,4 +8,10 @@
 
 set -e # Exit on failure
 
-exec uv run --quiet -m app.main "$@"
+SCRIPT_DIR="$(dirname "$0")"
+
+PYTHONSAFEPATH=1 PYTHONPATH="$SCRIPT_DIR" exec uv run \
+  --project "$SCRIPT_DIR" \
+  --quiet \
+  -m app.main \
+  "$@"
