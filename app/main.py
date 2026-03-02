@@ -124,7 +124,9 @@ def get_executable_name():
             for filename in os.listdir(directory):
                 full_path = os.path.join(directory, filename)
                 
-                if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+                if os.path.isfile(full_path) and ext in PATHEXT:
+                    executable.add(filename)
+                elif os.path.isfile(full_path):
                     executable.add(filename)
         except(FileNotFoundError, PermissionError, OSError):
             continue
