@@ -169,7 +169,28 @@ def completer(text, state):
 
     autocomplete_commands = executables + commands
 
-    options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
+    # Check if we're completing a command or a file argument
+    line_buffer = readline.get_line_buffer()
+    words = line_buffer.split()
+
+    # If typing first word → complete commands
+    # If typing argument → complete files
+    if len(words) == 0 or (len(words) == 1 and not line_buffer.endswith(' ')):
+        options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
+    else:
+        # File completion
+        options = []
+        directory = os.path.dirname(text) or '.'
+        prefix = os.path.basename(text)
+        try:
+            for name in os.listdir(directory):
+                if name.startswith(prefix):
+                    full = os.path.join(directory, name) if os.path.dirname(text) else name
+                    if os.path.isdir(os.path.join(directory, name)):
+                        full += '/'
+                    options.append(full)
+        except OSError:
+            pass
     options.sort()
 
     if state == 0:
