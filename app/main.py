@@ -39,6 +39,9 @@ def cmd_clear():
 
 def load_history_from_histfile():
     histfile = os.environ.get("HISTFILE")
+
+    if not histfile:
+        return
     if not os.path.exists(histfile):
         return
 
