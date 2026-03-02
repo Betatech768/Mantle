@@ -39,9 +39,6 @@ def cmd_clear():
 
 def load_history_from_histfile():
     histfile = os.environ.get("HISTFILE")
-    if not histfile:
-        return
-
     if not os.path.exists(histfile):
         return
 
@@ -146,7 +143,7 @@ def display_matches(substitution, matches, longest_match_length):
 
     print(" ".join(sorted_matches))
 
-    # Reprint the propmt and current input 
+    # Reprint the prompt and current input
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
 
     
@@ -196,7 +193,7 @@ def setup_readline():
 
 def cmd_type(*args):
     if not args:
-        print(f"type: missing arguement")
+        print(f"type: missing argument")
         return
     command = args[0]
 
@@ -207,12 +204,11 @@ def cmd_type(*args):
     # search in PATH directories
 
     path_env = os.environ.get('PATH', '')
-    if sys.platform == 'win32':
+    if platform.system() == 'Windows':
         directories = path_env.split(';')
     else:
         directories = path_env.split(':')
         
-
     for directory in directories:
         full_path = os.path.join(directory, command)
 
@@ -227,7 +223,7 @@ def find_executable(command):
     """ This Function is to Find an Executable file Path not Present in the Built-In"""
 
     path_env = os.environ.get('PATH', '')
-    separator = ";" if sys.platform == "win32" else ":"
+    separator = ";" if platform.system() == "Windows" else ":"
 
     directories = path_env.split(separator)
     
