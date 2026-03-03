@@ -180,7 +180,6 @@ def completer(text, state):
         prefix = os.path.basename(text)
         try:
             for name in os.listdir(directory):
-                options.append(directory)
                 if name.startswith(prefix):
                     full = os.path.join(directory, name) if os.path.dirname(text) else name
                     if os.path.isdir(os.path.join(directory, name)):
