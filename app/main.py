@@ -203,7 +203,7 @@ def completer(text, state):
 
     # Return the match at index 'state' with trailing space
     if state < len(options):
-        return options[state] + ' '
+        return options[state]
     else:
         return None
 
