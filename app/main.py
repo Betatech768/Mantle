@@ -17,17 +17,14 @@ _COMPLETION_ATTEMPT_COUNT = 0
 def cmd_exit():
     histfile = os.environ.get("HISTFILE")
 
-    if not histfile:
-        return
-
     if histfile:
         try:
             with open(histfile, "w") as f:
-                history_length = readline.get_current_history_length()
-                for i in range(1, history_length + 1):
-                    item = readline.get_history_item(i)
-                    if item and item.strip():
-                        f.write(item + "\n")
+                f.writelines(
+                    item + "\n"
+                    for i in range(1, readline.get_current_history_length() + 1)
+                    if (item := readline.get_history_item(i)) and item.strip()
+                )
         except Exception as e:
             print(f"Failed to save history: {e}", file=sys.stderr)
     os._exit(0)
