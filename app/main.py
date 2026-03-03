@@ -156,58 +156,49 @@ def display_matches(substitution, matches, longest_match_length):
 def completer(text, state):
     """
     Autocomplete function for readline.
-    Handle bell ringing on first TAB for multiple matches.
+    Rings bell on first TAB when multiple matches exist.
     """
-
     global _COMPLETION_ATTEMPT_COUNT, _LAST_COMPLETION_TEXT
-    commands = list(BUILTINS.keys())
-    executables = get_executable_name()
 
-    autocomplete_commands = executables + commands
-
-    # Check if we're completing a command or a file argument
     line_buffer = readline.get_line_buffer()
     words = line_buffer.split()
 
-    # If typing first word → complete commands
-    # If typing argument → complete files
+    # Complete commands for first word, files for arguments
     if len(words) == 0 or (len(words) == 1 and not line_buffer.endswith(' ')):
-        options = [cmd for cmd in autocomplete_commands if cmd.startswith(text)]
+        all_commands = list(BUILTINS.keys()) + get_executable_name()
+        options = sorted(cmd for cmd in all_commands if cmd.startswith(text))
     else:
-        # File completion
-        options = []
-        directory = os.path.dirname(text) or '.'
-        prefix = os.path.basename(text)
-        try:
-            for name in os.listdir(directory):
-                if name.startswith(prefix):
-                    full = os.path.join(directory, name) if os.path.dirname(text) else name
-                    if os.path.isdir(os.path.join(directory, name)):
-                        full += '/'
-                    options.append(full)
-        except OSError:
-            pass
-    options.sort()
+        options = sorted(_file_completions(text))
 
     if state == 0:
-        # New Completion attempt 
         if text == _LAST_COMPLETION_TEXT:
             _COMPLETION_ATTEMPT_COUNT += 1
         else:
-            _LAST_COMPLETION_TEXT = text 
+            _LAST_COMPLETION_TEXT = text
             _COMPLETION_ATTEMPT_COUNT = 1
-        # Ring Bell on first TAB if multiple matches 
+
         if _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
-    # Return the match at index 'state' with trailing space
-    if state < len(options):
-        return options[state] + ' '
-    else:
-        return None
+    return options[state] + ' ' if state < len(options) else None
 
 
+def _file_completions(text):
+    """Yield file/directory completions for the given text prefix."""
+    directory = os.path.dirname(text) or '.'
+    prefix = os.path.basename(text)
+
+    try:
+        for name in os.listdir(directory):
+            if not name.startswith(prefix):
+                continue
+            full = os.path.join(directory, name) if os.path.dirname(text) else name
+            if os.path.isdir(os.path.join(directory, name)):
+                full += '/'
+            yield full
+    except OSError:
+        pass
 def setup_readline():
     readline.set_completer(completer)
 
