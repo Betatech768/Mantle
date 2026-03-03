@@ -30,7 +30,6 @@ def cmd_exit():
                         f.write(item + "\n")
         except Exception as e:
             print(f"Failed to save history: {e}", file=sys.stderr)
-
     os._exit(0)
 
 def cmd_clear():
