@@ -146,12 +146,27 @@ def display_matches(substitution, matches, longest_match_length):
 
     # print matches separated by two spaces
 
-    print(" ".join(sorted_matches))
+    print("  ".join(sorted_matches))
 
     # Reprint the prompt and current input
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
 
-    
+
+
+"""
+-print the suggestion to stdout and after a while 
+ print the stdin as the original command
+-directory should have a backslash while files remains the same 
+-prompt reappears with original input preserved
+-1st Tab rings a bell if there are multiple matches 
+-2nd Tab shows the suggestions 
+Since the original input remains on the prompt, 
+the user can continue typing to narrow down the matches.
+"""
+
+
+
+
 
 def completer(text, state):
     """
@@ -181,8 +196,9 @@ def completer(text, state):
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
-        if os.path.isdir(options[state]):
-            return options[state] + '/' if state < len(options) else None
+        if state < len(options):
+            if os.path.isdir(options[state]):
+                return options[state] + '/' if state < len(options) else None
 
     return options[state] + " " if state < len(options) else None
 
