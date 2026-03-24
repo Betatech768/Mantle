@@ -184,7 +184,7 @@ def completer(text, state):
         # if os.path.isdir(options[state]):
         #     return options[state] + '/' if state < len(options) else None
 
-    return options[state] + ' ' if state < len(options) else None
+    return options[state] if state < len(options) else None
 
 
 def _file_completions(text):
@@ -199,6 +199,8 @@ def _file_completions(text):
             full = os.path.join(directory, name) if os.path.dirname(text) else name
             if os.path.isdir(os.path.join(directory, name)):
                 full += '/'
+            else:
+                full += ' '
             yield full
     except OSError:
         pass
