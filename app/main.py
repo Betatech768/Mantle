@@ -181,8 +181,8 @@ def completer(text, state):
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
-        if os.path.isdir(options[state]):
-            return options[state] + '/' if state < len(options) else None
+        # if os.path.isdir(options[state]):
+        #     return options[state] + '/' if state < len(options) else None
 
     return options[state] + ' ' if state < len(options) else None
 
