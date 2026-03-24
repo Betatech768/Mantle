@@ -200,7 +200,7 @@ def _file_completions(text):
             if os.path.isdir(os.path.join(directory, name)):
                 full += '/'
             else:
-                full += '  '
+                full += ' '
             yield full
     except OSError:
         pass
