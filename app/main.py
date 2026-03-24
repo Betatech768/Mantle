@@ -145,8 +145,9 @@ def display_matches(substitution, matches, longest_match_length):
     sorted_matches = sorted(matches)
 
     # print matches separated by two spaces
+    full_path = [match + '/' if os.path.isdir(match) else match for match in sorted_matches]
 
-    print("  ".join(sorted_matches))
+    print(" ".join(full_path))
 
     # Reprint the prompt and current input
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
