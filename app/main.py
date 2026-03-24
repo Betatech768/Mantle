@@ -144,8 +144,13 @@ def display_matches(substitution, matches, longest_match_length):
     # Sort matches alphabetically 
     sorted_matches = sorted(matches)
 
-    # print matches separated by two spaces
-    full_path = [match + '/' if os.path.isdir(match) else match for match in sorted_matches]
+    full_path = []
+
+    for match in sorted_matches:
+        if os.path.isdir(match):
+            full_path.append(match + '/')
+        else:
+            full_path.append(match)
 
     print(" ".join(full_path))
 
