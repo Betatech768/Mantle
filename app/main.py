@@ -147,12 +147,12 @@ def display_matches(substitution, matches, longest_match_length):
     full_path = []
 
     for match in sorted_matches:
-        if os.path.isdir(match):
+        if os.path.isdir(os.path.join(os.getcwd(), match)):
             full_path.append(match + '/')
         else:
             full_path.append(match)
 
-    print(" ".join(full_path))
+    print("  ".join(full_path))
 
     # Reprint the prompt and current input
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
@@ -202,9 +202,9 @@ def completer(text, state):
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
-        # if state < len(options):
-        #     if os.path.isdir(options[state]):
-        #         return options[state] + '/' if state < len(options) else None
+        if state < len(options):
+            if os.path.isdir(options[state]):
+                return options[state] + '/' if state < len(options) else None
 
     return options[state] + " " if state < len(options) else None
 
