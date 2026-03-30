@@ -240,7 +240,7 @@ def completer(text, state):
     if lcp and len(lcp) > len(text):
         return None
 
-    return options[state] if state < len(options) else None
+    return options[state] + " " if state < len(options) else None
 
 
 def _file_completions(text):
