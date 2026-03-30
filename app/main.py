@@ -196,15 +196,16 @@ def completer(text, state):
             _LAST_COMPLETION_TEXT = text
             _COMPLETION_ATTEMPT_COUNT = 1
 
+        if len(options) > 1:
+            lcp = longest_common_prefix(options)
+            if lcp and lcp != text:
+                return lcp
+
         if _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
         if state < len(options):
-            if len(options) > 1:
-                lcp = longest_common_prefix(options)
-                if lcp and lcp != text:
-                    return lcp
             if os.path.isdir(options[state]):
                 return options[state] + '/' if state < len(options) else None
 
