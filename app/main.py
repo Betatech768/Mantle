@@ -143,13 +143,11 @@ def display_matches(substitution, matches, longest_match_length):
     full_path = []
 
     for match in sorted_matches:
-        # Strip any trailing space or slash that may have been appended
-        clean = match.rstrip("/ ")
-        # Check if directory — try relative path directly and also joined with cwd
-        if os.path.isdir(clean) or os.path.isdir(os.path.join(os.getcwd(), clean)):
-            full_path.append(clean + '/')
+        full = os.path.join(os.getcwd(), match)
+        if os.path.isdir(full):
+            full_path.append(match.rstrip("/") + '/')
         else:
-            full_path.append(clean)
+            full_path.append(match)
 
     print("  ".join(full_path))
 
@@ -173,9 +171,7 @@ def longest_common_prefix(text):
 def completer(text, state):
     """
     Autocomplete function for readline.
-    - If multiple matches share a longer common prefix than current input: complete to LCP.
-    - If LCP == current input and multiple matches: ring bell on first TAB, list on second.
-    - If exactly one match: complete with trailing space or slash.
+    Rings bell on first TAB when multiple matches exist.
     """
     global _COMPLETION_ATTEMPT_COUNT, _LAST_COMPLETION_TEXT
 
@@ -190,58 +186,23 @@ def completer(text, state):
         options = sorted(_file_completions(text))
 
     if state == 0:
-        # Track how many times TAB has been pressed with the same text
         if text == _LAST_COMPLETION_TEXT:
             _COMPLETION_ATTEMPT_COUNT += 1
         else:
             _LAST_COMPLETION_TEXT = text
             _COMPLETION_ATTEMPT_COUNT = 1
 
-        if len(options) == 0:
-            return None
-
-        if len(options) == 1:
-            # Exactly one match — complete with trailing slash or space
-            match = options[0]
-            if os.path.isdir(match):
-                readline.insert_text(match[len(text):] + '/')
-            else:
-                readline.insert_text(match[len(text):] + ' ')
-            readline.redisplay()
-            return None
-
-        # Multiple matches: compute LCP
-        lcp = longest_common_prefix(options)
-
-        if lcp and len(lcp) > len(text):
-            # LCP extends beyond current input — complete to LCP, no trailing char
-            readline.insert_text(lcp[len(text):])
-            readline.redisplay()
-            # Reset so next TAB on the same (now longer) text starts fresh
-            _LAST_COMPLETION_TEXT = lcp
-            _COMPLETION_ATTEMPT_COUNT = 1
-            return None
-
-        # LCP == current text (no further common prefix)
-        if _COMPLETION_ATTEMPT_COUNT == 1:
-            # First TAB: ring the bell
+        if len(options) > 1:
+            lcp = longest_common_prefix(options)
+            if lcp and lcp != text:
+                options = [lcp]
+        elif _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
-            return None
-        else:
-            # Second TAB: fall through to return options for display_matches
-            pass
 
-    # Return individual options so readline can call display_matches
-    if len(options) == 0 or len(options) == 1:
-        return None
-
-    lcp = longest_common_prefix(options)
-    if lcp and len(lcp) > len(text):
-        return None
-    if state < len(options):
-        if os.path.isdir(options[state]):
-            return options[state] + '/' if state < len(options) else None
+        if state < len(options):
+            if os.path.isdir(options[state]):
+                return options[state] + '/' if state < len(options) else None
 
     return options[state] + " " if state < len(options) else None
 
