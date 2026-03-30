@@ -151,7 +151,7 @@ def display_matches(substitution, matches, longest_match_length):
             if not match.endswith("/"):
                 full_path.append(match + '/')
         else:
-            full_path.append(matchc)
+            full_path.append(match)
 
     print("  ".join(full_path))
 
