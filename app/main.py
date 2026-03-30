@@ -143,11 +143,13 @@ def display_matches(substitution, matches, longest_match_length):
     full_path = []
 
     for match in sorted_matches:
-        full = os.path.join(os.getcwd(), match)
-        if os.path.isdir(full):
-            full_path.append(match.rstrip("/") + '/')
+        # Strip any trailing space or slash that may have been appended
+        clean = match.rstrip("/ ")
+        # Check if directory — try relative path directly and also joined with cwd
+        if os.path.isdir(clean) or os.path.isdir(os.path.join(os.getcwd(), clean)):
+            full_path.append(clean + '/')
         else:
-            full_path.append(match)
+            full_path.append(clean)
 
     print("  ".join(full_path))
 
@@ -238,7 +240,7 @@ def completer(text, state):
     if lcp and len(lcp) > len(text):
         return None
 
-    return options[state] + " " if state < len(options) else None
+    return options[state] if state < len(options) else None
 
 
 def _file_completions(text):
