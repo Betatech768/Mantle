@@ -201,14 +201,25 @@ def completer(text, state):
             if lcp and lcp != text:
                 options = [lcp]
 
-        if _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
+        elif _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
 
         if state < len(options):
-            if os.path.isdir(options[state]):
-                return options[state] + '/' if state < len(options) else None
+            result = options[state]
 
+            # Only add suffix when EXACTLY ONE match
+            if len(options) == 1:
+                full_path = os.path.join(os.getcwd(), result)
+
+                if os.path.isdir(full_path):
+                    return result.rstrip("/") + "/"
+                else:
+                    return result + " "
+
+            return result
+
+        return None
     return options[state] + " " if state < len(options) else None
 
 
