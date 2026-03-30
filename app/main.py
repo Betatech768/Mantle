@@ -5,14 +5,13 @@ import subprocess
 import readline
 import platform
 
-
-
 _EXECUTABLE_CACHE = None
 
 # Track last completion attempt for bell ringing
 _LAST_HISTORY_WRITE_INDEX = 0
 _LAST_COMPLETION_TEXT = None
 _COMPLETION_ATTEMPT_COUNT = 0
+
 
 def cmd_exit():
     histfile = os.environ.get("HISTFILE")
@@ -29,10 +28,11 @@ def cmd_exit():
             print(f"Failed to save history: {e}", file=sys.stderr)
     os._exit(0)
 
+
 def cmd_clear():
     system_type = platform.system()
     if system_type != "Windows":
-        print('\033c', end = "")
+        print('\033c', end="")
     else:
         os.system('cls')
 
@@ -52,11 +52,9 @@ def load_history_from_histfile():
                 readline.add_history(line)
 
 
-
-
 def cmd_history(*args):
     global _LAST_HISTORY_WRITE_INDEX
-    
+
     if len(args) == 0:
         history_length = readline.get_current_history_length()
         for i in range(1, history_length + 1):
@@ -69,8 +67,8 @@ def cmd_history(*args):
                 line = line.rstrip("\n")
                 if line.strip():
                     readline.add_history(line)
-        return 
-    
+        return
+
 
     elif len(args) == 2 and args[0] == "-w":
         file = args[1]
@@ -81,7 +79,7 @@ def cmd_history(*args):
                 item = readline.get_history_item(i)
                 if item and item.strip():
                     f.write(item + '\n')
-        return 
+        return
 
     elif len(args) == 2 and args[0] == "-a":
         file = args[1]
@@ -95,20 +93,18 @@ def cmd_history(*args):
 
         # update cursor AFTER appending
         _LAST_HISTORY_WRITE_INDEX = history_length
-        return 
+        return
 
     elif len(args) == 1:
         limit = int(args[0])
         history_length = readline.get_current_history_length()
-        start_history = max(1, history_length - limit + 1 )
+        start_history = max(1, history_length - limit + 1)
 
         for i in range(start_history, history_length + 1):
             print(f"    {i}  {readline.get_history_item(i)}")
 
 
-
 def get_executable_name():
-
     global _EXECUTABLE_CACHE
 
     if _EXECUTABLE_CACHE is not None:
@@ -122,11 +118,11 @@ def get_executable_name():
     for directory in directories:
         try:
             if not os.path.isdir(directory):
-                continue 
-            
+                continue
+
             for filename in os.listdir(directory):
                 full_path = os.path.join(directory, filename)
-                
+
                 if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
                     executable.add(filename)
                 elif os.path.isfile(full_path):
@@ -136,12 +132,13 @@ def get_executable_name():
     _EXECUTABLE_CACHE = sorted(list(executable))
     return _EXECUTABLE_CACHE
 
+
 def display_matches(substitution, matches, longest_match_length):
     """Custom display function for showing multiple matches called by readline when there are multiple completions."""
 
-    print() # New Line 
+    print()  # New Line
 
-    # Sort matches alphabetically 
+    # Sort matches alphabetically
     sorted_matches = sorted(matches)
     full_path = []
 
@@ -154,14 +151,13 @@ def display_matches(substitution, matches, longest_match_length):
 
     print("  ".join(full_path))
 
-
     # Reprint the prompt and current input
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
 
 
 def longest_common_prefix(text):
     if not text:
-        return  ""
+        return ""
     prefix = text[0]
 
     for t in text[1:]:
@@ -175,7 +171,9 @@ def longest_common_prefix(text):
 def completer(text, state):
     """
     Autocomplete function for readline.
-    Rings bell on first TAB when multiple matches exist.
+    - If multiple matches share a longer common prefix than current input: complete to LCP.
+    - If LCP == current input and multiple matches: ring bell on first TAB, list on second.
+    - If exactly one match: complete with trailing space or slash.
     """
     global _COMPLETION_ATTEMPT_COUNT, _LAST_COMPLETION_TEXT
 
@@ -190,26 +188,57 @@ def completer(text, state):
         options = sorted(_file_completions(text))
 
     if state == 0:
+        # Track how many times TAB has been pressed with the same text
         if text == _LAST_COMPLETION_TEXT:
             _COMPLETION_ATTEMPT_COUNT += 1
         else:
             _LAST_COMPLETION_TEXT = text
             _COMPLETION_ATTEMPT_COUNT = 1
 
-        if len(options) > 1:
-            lcp = longest_common_prefix(options)
-            if lcp and lcp != text:
-                options = [lcp]
+        if len(options) == 0:
+            return None
 
-        elif _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
+        if len(options) == 1:
+            # Exactly one match — complete with trailing slash or space
+            match = options[0]
+            if os.path.isdir(match):
+                readline.insert_text(match[len(text):] + '/')
+            else:
+                readline.insert_text(match[len(text):] + ' ')
+            readline.redisplay()
+            return None
+
+        # Multiple matches: compute LCP
+        lcp = longest_common_prefix(options)
+
+        if lcp and len(lcp) > len(text):
+            # LCP extends beyond current input — complete to LCP, no trailing char
+            readline.insert_text(lcp[len(text):])
+            readline.redisplay()
+            # Reset so next TAB on the same (now longer) text starts fresh
+            _LAST_COMPLETION_TEXT = lcp
+            _COMPLETION_ATTEMPT_COUNT = 1
+            return None
+
+        # LCP == current text (no further common prefix)
+        if _COMPLETION_ATTEMPT_COUNT == 1:
+            # First TAB: ring the bell
             sys.stdout.write('\x07')
             sys.stdout.flush()
+            return None
+        else:
+            # Second TAB: fall through to return options for display_matches
+            pass
 
-        if state < len(options):
-            if os.path.isdir(options[state]):
-                return options[state] + '/' if state < len(options) else None
+    # Return individual options so readline can call display_matches
+    if len(options) == 0 or len(options) == 1:
+        return None
 
-    return options[state] + " " if state < len(options) else None
+    lcp = longest_common_prefix(options)
+    if lcp and len(lcp) > len(text):
+        return None
+
+    return options[state] if state < len(options) else None
 
 
 def _file_completions(text):
@@ -225,6 +254,8 @@ def _file_completions(text):
             yield full
     except OSError:
         pass
+
+
 def setup_readline():
     readline.set_completer(completer)
 
@@ -234,6 +265,7 @@ def setup_readline():
 
     readline.set_completion_display_matches_hook(display_matches)
 
+
 def cmd_type(*args):
     if not args:
         print(f"type: missing argument")
@@ -242,25 +274,26 @@ def cmd_type(*args):
 
     if command in BUILTINS:
         print(f"{command} is a shell builtin")
-        return 
-    
-    # search in PATH directories
+        return
+
+        # search in PATH directories
 
     path_env = os.environ.get('PATH', '')
     if platform.system() == 'Windows':
         directories = path_env.split(';')
     else:
         directories = path_env.split(':')
-        
+
     for directory in directories:
         full_path = os.path.join(directory, command)
 
         if os.path.isfile(full_path):
             if os.access(full_path, os.X_OK):
                 print(f"{command} is {full_path}")
-                return 
-   
+                return
+
     print(f"{command} not found")
+
 
 def find_executable(command):
     """ This Function is to Find an Executable file Path not Present in the Built-In"""
@@ -269,7 +302,6 @@ def find_executable(command):
     separator = ";" if platform.system() == "Windows" else ":"
 
     directories = path_env.split(separator)
-    
 
     for directory in directories:
 
@@ -304,13 +336,13 @@ def executable_pipeline(command):
     for i, cmd in enumerate(commands):
 
         cmd = cmd.strip()
-        
+
         try:
             parts = shlex.split(cmd)
         except Exception as e:
             print(f"Error parsing command: {e}", file=sys.stderr)
             return
-        
+
         if not parts:
             continue
 
@@ -322,7 +354,7 @@ def executable_pipeline(command):
         if not is_last:
             read_fd, write_fd = os.pipe()
         else:
-            read_fd = write_fd = None 
+            read_fd = write_fd = None
 
         pid = os.fork()
 
@@ -336,7 +368,6 @@ def executable_pipeline(command):
                 os.close(read_fd)
                 os.close(write_fd)
 
-        
             if executable_name in BUILTINS:
                 try:
                     BUILTINS[executable_name](*args)
@@ -345,7 +376,7 @@ def executable_pipeline(command):
                     print(f"Error: {e}", file=sys.stderr)
                     os._exit(1)
             else:
-                executable_path = find_executable(executable_name) 
+                executable_path = find_executable(executable_name)
                 if not executable_path:
                     print(f"{executable_name}: command not found", file=sys.stderr)
                     os._exit(127)
@@ -359,11 +390,11 @@ def executable_pipeline(command):
 
             if prev_read_fd is not None:
                 os.close(prev_read_fd)
-            
+
             if not is_last:
                 os.close(write_fd)
                 prev_read_fd = read_fd
-        
+
     for pid in pids:
         try:
             os.waitpid(pid, 0)
@@ -377,10 +408,10 @@ def get_cwd():
     print(working_directory)
 
 
-# Change working Directory 
+# Change working Directory
 def change_directory(*args):
     if not args:
-        return 
+        return
     directory = args[0]
     try:
         if directory == "~":
@@ -397,11 +428,10 @@ def change_directory(*args):
     pass
 
 
-
 BUILTINS = {
-    "exit" : cmd_exit,
-    "echo" : lambda *args: print(" ".join(args)),
-    "help" : lambda *args: print("available commands exit, help, echo, clear"),
+    "exit": cmd_exit,
+    "echo": lambda *args: print(" ".join(args)),
+    "help": lambda *args: print("available commands exit, help, echo, clear"),
     "clear": cmd_clear,
     "type": cmd_type,
     "pwd": get_cwd,
@@ -409,28 +439,27 @@ BUILTINS = {
     "history": cmd_history,
 }
 
-def main():
 
+def main():
     setup_readline()
 
     load_history_from_histfile()
-    
+
     # Initialize append cursor to current history length
     global _LAST_HISTORY_APPEND_INDEX
     _LAST_HISTORY_APPEND_INDEX = readline.get_current_history_length()
-   
+
     while True:
         try:
             command = input('$ ').strip()
-           
+
             if not command:
-                continue 
+                continue
 
             output_file = None
             redirect_err = False
-            redirect_stdout = False 
-            update_file = False 
-
+            redirect_stdout = False
+            update_file = False
 
             # Check for pipeline BEFORE checking for redirection
             if '|' in command:
@@ -439,10 +468,10 @@ def main():
                 continue
 
             if ">>" in command:
-                update_file= True
+                update_file = True
                 if "2>>" in command:
                     parts = command.split("2>>", 1)
-                    redirect_err= True
+                    redirect_err = True
                 elif "1>>" in command:
                     parts = command.split('1>>', 1)
                     redirect_stdout = True
@@ -456,7 +485,7 @@ def main():
                     parts = command.split('2>', 1)
                     redirect_err = True
                 elif "1>" in command:
-                    parts = command.split('1>', 1)                    
+                    parts = command.split('1>', 1)
                     redirect_stdout = True
                 else:
                     parts = command.split('>', 1)
@@ -497,18 +526,17 @@ def main():
                         if redirect_err:
                             with open(output_file, mode) as f:
                                 subprocess.run([userCommand] + args, executable=executable_path, stderr=f)
-                        else:  
+                        else:
                             with open(output_file, mode) as f:
                                 subprocess.run([userCommand] + args, executable=executable_path, stdout=f)
                     else:
                         subprocess.run([userCommand] + args, executable=executable_path)
                 else:
-                        print(f"{userCommand}: not found")
+                    print(f"{userCommand}: not found")
         except KeyboardInterrupt:
-                print()
+            print()
         except Exception as e:
-                print(f"{userCommand} not found, error - {e}")
-                
+            print(f"{userCommand} not found, error - {e}")
 
 
 if __name__ == "__main__":
