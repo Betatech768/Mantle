@@ -192,10 +192,28 @@ def completer(text, state):
             _LAST_COMPLETION_TEXT = text
             _COMPLETION_ATTEMPT_COUNT = 1
 
-        if len(options) > 1:
-            lcp = longest_common_prefix(options)
-            if lcp and lcp != text:
-                options = [lcp]
+        if len(options) == 1:
+            # Exactly one match — complete with trailing slash or space
+            match = options[0]
+            if os.path.isdir(match):
+                readline.insert_text(match[len(text):] + '/')
+            else:
+                readline.insert_text(match[len(text):] + ' ')
+            readline.redisplay()
+            return None
+
+        # Multiple matches: compute LCP
+        lcp = longest_common_prefix(options)
+
+        if lcp and len(lcp) > len(text):
+            # LCP extends beyond current input — complete to LCP, no trailing char
+            readline.insert_text(lcp[len(text):])
+            readline.redisplay()
+            # Reset so next TAB on the same (now longer) text starts fresh
+            _LAST_COMPLETION_TEXT = lcp
+            _COMPLETION_ATTEMPT_COUNT = 1
+            return None
+
         elif _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
