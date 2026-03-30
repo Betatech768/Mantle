@@ -135,9 +135,7 @@ def get_executable_name():
 
 def display_matches(substitution, matches, longest_match_length):
     """Custom display function for showing multiple matches called by readline when there are multiple completions."""
-
     print()  # New Line
-
     # Sort matches alphabetically
     sorted_matches = sorted(matches)
     full_path = []
@@ -194,8 +192,9 @@ def completer(text, state):
 
         if len(options) > 1:
             lcp = longest_common_prefix(options)
-            if lcp and lcp != text:
-                options = [lcp]
+            lcp_dir = [path +"/" if os.path.isdir(path) else path for path in lcp]
+            if lcp_dir and lcp_dir != text:
+                options = [lcp_dir]
         elif _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
