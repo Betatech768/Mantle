@@ -143,13 +143,12 @@ def display_matches(substitution, matches, longest_match_length):
 
     # Sort matches alphabetically 
     sorted_matches = sorted(matches)
-
     full_path = []
 
     for match in sorted_matches:
-        if os.path.isdir(match):
-            if not match.endswith("/"):
-                full_path.append(match + '/')
+        full = os.path.join(os.getcwd(), match)
+        if os.path.isdir(full):
+            full_path.append(match.rstrip("/") + '/')
         else:
             full_path.append(match)
 
