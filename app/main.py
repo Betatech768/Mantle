@@ -239,8 +239,11 @@ def completer(text, state):
     lcp = longest_common_prefix(options)
     if lcp and len(lcp) > len(text):
         return None
+    if state < len(options):
+        if os.path.isdir(options[state]):
+            return options[state] + '/' if state < len(options) else None
 
-    return options[state] if state < len(options) else None
+    return options[state] + " " if state < len(options) else None
 
 
 def _file_completions(text):
