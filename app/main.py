@@ -206,7 +206,7 @@ def completer(text, state):
             if os.path.isdir(match):
                 readline.insert_text(match[len(text):] + '/')
             else:
-                readline.insert_text(match[len(text):] + '  ')
+                readline.insert_text(match[len(text):] + ' ')
             readline.redisplay()
             return None
 
