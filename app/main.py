@@ -154,24 +154,22 @@ def display_matches(substitution, matches, longest_match_length):
 
     print("  ".join(full_path))
 
+
     # Reprint the prompt and current input
     print(f"$ {readline.get_line_buffer()}", end="", flush=True)
 
 
+def longest_common_prefix(text):
+    if not text:
+        return  ""
+    prefix = text[0]
 
-"""
--print the suggestion to stdout and after a while 
- print the stdin as the original command
--directory should have a backslash while files remains the same 
--prompt reappears with original input preserved
--1st Tab rings a bell if there are multiple matches 
--2nd Tab shows the suggestions 
-Since the original input remains on the prompt, 
-the user can continue typing to narrow down the matches.
-"""
-
-
-
+    for t in text[1:]:
+        while not t.startwith(prefix):
+            prefix = prefix[:-1]
+            if not prefix:
+                return ""
+    return prefix
 
 
 def completer(text, state):
@@ -203,6 +201,10 @@ def completer(text, state):
             sys.stdout.flush()
 
         if state < len(options):
+            if len(options) > 1:
+                lcp = longest_common_prefix(options)
+                if lcp and lcp != text:
+                    return lcp
             if os.path.isdir(options[state]):
                 return options[state] + '/' if state < len(options) else None
 
