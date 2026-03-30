@@ -194,7 +194,7 @@ def completer(text, state):
             lcp = longest_common_prefix(options)
             lcp_dir = [path +"/" if os.path.isdir(path) else path for path in lcp]
             if lcp_dir and lcp_dir != text:
-                options = [lcp_dir]
+                options = lcp_dir
         elif _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
             sys.stdout.flush()
