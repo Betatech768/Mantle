@@ -206,20 +206,9 @@ def completer(text, state):
             sys.stdout.flush()
 
         if state < len(options):
-            result = options[state]
+            if os.path.isdir(options[state]):
+                return options[state] + '/' if state < len(options) else None
 
-            # Only add suffix when EXACTLY ONE match
-            if len(options) == 1:
-                full_path = os.path.join(os.getcwd(), result)
-
-                if os.path.isdir(full_path):
-                    return result.rstrip("/") + "/"
-                else:
-                    return result + " "
-
-            return result
-
-        return None
     return options[state] + " " if state < len(options) else None
 
 
