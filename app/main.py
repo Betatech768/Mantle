@@ -165,7 +165,7 @@ def longest_common_prefix(text):
     prefix = text[0]
 
     for t in text[1:]:
-        while not t.startwith(prefix):
+        while not t.startswith(prefix):
             prefix = prefix[:-1]
             if not prefix:
                 return ""
@@ -199,7 +199,7 @@ def completer(text, state):
         if len(options) > 1:
             lcp = longest_common_prefix(options)
             if lcp and lcp != text:
-                return lcp
+                options = [lcp]
 
         if _COMPLETION_ATTEMPT_COUNT == 1 and len(options) > 1:
             sys.stdout.write('\x07')
